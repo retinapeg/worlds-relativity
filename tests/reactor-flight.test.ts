@@ -18,7 +18,7 @@ it('maps shared burst stages to Directing instructions without changing flight s
 
 it('keeps a coherent world across burst, coasting and view changes', () => {
   const simulation = new Simulation(false); simulation.startBurst();
-  simulation.advance(0.8);
+  simulation.advance(2);
   const burst = simulation.snapshot();
   const acceleration = worldDirection(burst);
   expect(worldDirection({ ...burst, burstPhase: 'COASTING' }).text).toBe(acceleration.text);
