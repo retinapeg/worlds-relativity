@@ -5,7 +5,8 @@ HANDOFF.md**. Existing allowances are exhausted. No test starts until fresh expl
 approval covers attempted allocations, duration and spending uncertainty. Unpaid
 fixtures do not establish Reactor playback.
 
-Runware stays **BLOCKED** without a server-side key and separate generation
+Runware stays **BLOCKED**: the supplied key is saved locally in ignored server
+settings (0600), but untested and not deployed to Modal. It still needs separate generation
 allowance. No cached output was observed. It is unnecessary for the local demo or
 the proposed Reactor test.
 

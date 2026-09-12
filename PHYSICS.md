@@ -95,7 +95,12 @@ Broadband stars are not declared absent because of a single shifted spectral lin
 
 The procedural nebula uses a qualitative spectral tint. The optional frequency
 map has explicitly labelled false colours and display-only clamps. Raw D and the
-numerical readouts are unaffected by either colour mode.
+numerical readouts are unaffected by either colour mode. The additive star layer
+uses display-only exposure compensation `1 / (1 + 0.2 max(D − 1, 0)²)` after
+colour-space conversion. This reduces a clipped white patch where aberration
+crowds many stars together. It leaves D ≤ 1 stars, background, point sizes and
+ray directions unchanged. It is an artistic readability adjustment, not a
+relativistic intensity law; all numerical frequency/length/clock values are raw.
 
 The optical baseline uses the same scene, camera and lab reference positions with
 only the optical boost set to zero. Measurement beta, clocks and accumulated

@@ -128,7 +128,9 @@ and EXECUTED, and direct remote end returned completed. Neither test produced
 playable video. One preliminary readiness allocation also may be billable.
 All previous allowances are exhausted. The subsequent media-origin, playback and
 cleanup repairs have unpaid fixture validation only. **Live video is UNVERIFIED.**
-Runware is **BLOCKED** with no key, allowance or observed cached output. Keep the
+Runware is **BLOCKED**: its supplied key is saved locally but untested and absent
+from the retained Modal service; generation allowance is zero and no cached output
+has been observed. Keep the
 local simulation as the presentation baseline. The one proposed fresh live-test
 approval, duration/spending bounds and uncertainty are specified in HANDOFF.md.
 

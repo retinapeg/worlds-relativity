@@ -91,7 +91,7 @@ belong in the final receipt described in QA.md.
 | Modal | **LIVE** | Retained CPU bridge and local proxy return health 200; proxy reports Modal hosting. Prior protected token exchange worked. No redeployment this pass. |
 | Reactor control/auth | **LIVE — previously verified** | Two earlier worlds entered travel. Final β=0 direction was accepted and timeline EXECUTED; direct end returned completed. Historical evidence, not a final-revision live retest. |
 | Reactor video | **UNVERIFIED** | Neither earlier travel produced playable video. Media-origin and playback repairs have unpaid validation only. |
-| Runware | **BLOCKED** | No key or allowance. Status ready:false / attempted:false. No generated or cached image observed. Adapter/cache code is not successful sponsor usage. |
+| Runware | **BLOCKED** | User-supplied key saved locally in ignored server settings, untested. Retained Modal service still has no Runware key; generation allowance remains zero. Status ready:false / attempted:false; no generated/cached image. Adapter/cache code is not successful sponsor usage. |
 
 An earlier preliminary allocation failed readiness before world creation; count it
 as potentially billable in addition to the two travels. First-travel SDK cleanup
@@ -133,7 +133,8 @@ Expected offline Runware request errors remain visible in evidence. Do not merge
 historical counts into a claim about final HEAD.
 
 Credentials remain server-side in ignored `.env.server` (0600) and the retained
-Modal secret. Primary credentials worked earlier; previous credentials and FAL
+Modal secret. The new Runware key is saved only locally, not in the deployed secret,
+and has not been validated or used. Primary credentials worked earlier; previous credentials and FAL
 remain unused. No browser/VITE secrets. Staged source and rebuilt candidate are
 scanned without printing secrets; snapshot runtime/source hashes are checked.
 Headless Chrome uses an isolated profile. No desktop Computer Use or macOS changes.

@@ -44,12 +44,16 @@ uniform float eta, pixelRatio;
 attribute float temperature, size, power;
 varying vec3 vColour;
 varying float vSize;
+varying float vExposure;
 ${photonGLSL}
 ${colourGLSL}
 void main() {
   vec4 ray = observeRay(normalize(position),eta);
   vec4 colour = shiftedSpectrum(temperature,ray.w);
   vColour = (spectral ? colour.rgb*colour.a : frequencyColour(ray.w))*power;
+  // Illustrative exposure keeps concentrated additive stars legible, not photometry.
+  float crowding = max(ray.w - 1.0, 0.0);
+  vExposure = 1.0 / (1.0 + 0.2 * crowding * crowding);
   vec4 view = modelViewMatrix*vec4(ray.xyz,1.0);
   gl_Position = projectionMatrix*view;
   gl_PointSize = view.z < 0.0 ? size*pixelRatio : 0.0;
@@ -59,6 +63,7 @@ void main() {
 export const starFragment = /* glsl */ `
 varying vec3 vColour;
 varying float vSize;
+varying float vExposure;
 void main() {
   vec2 p = (gl_PointCoord-0.5)*2.0;
   float r = length(p);
@@ -67,6 +72,7 @@ void main() {
   if (vSize > 15.0) glow += (exp(-abs(p.x)*80.0)+exp(-abs(p.y)*80.0))*exp(-r*5.0)*0.35;
   gl_FragColor = vec4(vColour*glow,1.0);
   #include <colorspace_fragment>
+  gl_FragColor.rgb *= vExposure;
 }
 `;
 export const guideVertex = /* glsl */ `
