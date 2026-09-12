@@ -16,6 +16,9 @@ const CUES = [
 ];
 export const DEMO_DURATION = 54;
 const TRANSITION_SECONDS = 0.8;
+export const BURST_BASELINE = 0.2;
+export type BurstPhase = 'BRAKING' | 'ACCELERATING' | 'COASTING';
+const BURST_COAST_SECONDS = 1.5;
 
 export class Simulation {
   input: ControlInput = { targetBeta: 0, lookYaw: 0, lookPitch: 0 };
@@ -27,25 +30,42 @@ export class Simulation {
   opticalBaseline = false;
   private cue = 0;
   private ramp: { from: number; to: number; elapsed: number } | null = null;
+  private burst: { phase: BurstPhase; elapsed: number; time: number; finalBrake: boolean } | null = null;
 
   constructor(running = true) { this.running = running; }
 
   setVelocity(beta: number, manual = true) {
     if (finite(beta) < 0 || beta > MAX_BETA) throw new RangeError('Control beta must be in [0, 0.999]');
-    if (manual) this.stopDemo();
+    if (manual) { this.burst = null; this.stopDemo(); }
     this.input.targetBeta = beta;
     const to = Math.atanh(beta);
     // User changes are idealised constant-speed segment boundaries. The existing
-    // tour alone retains its prescribed, exactly integrated rapidity transitions.
+    // tour and finite burst retain their exactly integrated rapidity transitions.
     if (manual || !this.running) { this.record(); this.eta = to; this.ramp = null; return; }
     if (Math.abs(to - this.eta) < 1e-12) { this.ramp = null; return; }
     this.record();
     this.ramp = { from: this.eta, to, elapsed: 0 };
   }
   stopDemo() {
-    this.demoTime = null; this.ramp = null;
-    this.input.targetBeta = Math.tanh(this.eta);
+    this.demoTime = null;
+    // Looking around or bypassing the optics must preserve the same flight.
+    if (!this.burst) { this.ramp = null; this.input.targetBeta = Math.tanh(this.eta); }
     this.record();
+  }
+  startBurst() {
+    this.burst = null; this.stopDemo(); this.running = true;
+    const braking = Math.tanh(this.eta) > BURST_BASELINE;
+    this.burst = { phase: braking ? 'BRAKING' : 'ACCELERATING', elapsed: 0, time: 0, finalBrake: false };
+    this.setVelocity(braking ? BURST_BASELINE : MAX_BETA, false);
+  }
+  private applyBurstBoundary() {
+    const burst = this.burst;
+    if (!burst || burst.elapsed < (burst.phase === 'COASTING' ? BURST_COAST_SECONDS : TRANSITION_SECONDS) - 1e-9) return;
+    burst.elapsed = 0;
+    if (burst.phase === 'BRAKING' && burst.finalBrake) { this.burst = null; this.record(); }
+    else if (burst.phase === 'BRAKING') { burst.phase = 'ACCELERATING'; this.setVelocity(MAX_BETA, false); }
+    else if (burst.phase === 'ACCELERATING') burst.phase = 'COASTING';
+    else { burst.phase = 'BRAKING'; burst.finalBrake = true; this.setVelocity(BURST_BASELINE, false); }
   }
   setLook(yaw: number, pitch = 0) {
     this.stopDemo();
@@ -62,6 +82,7 @@ export class Simulation {
     this.history = [{ t: 0, x: 0 }];
     this.eta = 0;
     this.ramp = null;
+    this.burst = null;
     this.demoTime = null;
     this.opticalBaseline = false;
     this.running = false;
@@ -82,27 +103,32 @@ export class Simulation {
     // as many short frames. Visibility suspension is handled by the UI clock.
     while (dt > 1e-10) {
       this.applyCues();
+      this.applyBurstBoundary();
       if (this.demoTime !== null && this.demoTime >= DEMO_DURATION - 1e-9) {
         this.demoTime = null; this.running = false; this.record(); break;
       }
       const untilCue = this.demoTime === null ? Infinity :
         (CUES[this.cue]?.at ?? DEMO_DURATION) - this.demoTime;
-      const step = Math.min(dt, untilCue, this.ramp ? Math.min(0.1, TRANSITION_SECONDS - this.ramp.elapsed) : Infinity);
+      const untilBurst = this.burst === null ? Infinity :
+        (this.burst.phase === 'COASTING' ? BURST_COAST_SECONDS : TRANSITION_SECONDS) - this.burst.elapsed;
+      const step = Math.min(dt, untilCue, untilBurst, this.ramp ? Math.min(0.1, TRANSITION_SECONDS - this.ramp.elapsed) : Infinity);
       if (step <= 1e-10) break;
       if (this.ramp) {
         this.ramp.elapsed = Math.min(TRANSITION_SECONDS, this.ramp.elapsed + step);
         const next = this.ramp.from + (this.ramp.to - this.ramp.from) * this.ramp.elapsed / TRANSITION_SECONDS;
         this.clocks = advanceRamp(this.clocks, this.eta, next, step);
         this.eta = next;
-        this.record(); // Curved tour intervals are sampled; manual segments stay exact.
+        this.record(); // Curved prescribed intervals are sampled; manual segments stay exact.
         if (this.ramp.elapsed >= TRANSITION_SECONDS - 1e-9) {
           this.eta = this.ramp.to; this.ramp = null; this.record();
         }
       } else this.clocks = advanceClocks(this.clocks, Math.tanh(this.eta), step);
       if (this.demoTime !== null) this.demoTime += step;
+      if (this.burst) { this.burst.elapsed += step; this.burst.time += step; }
       dt -= step;
     }
     this.applyCues();
+    this.applyBurstBoundary();
     if (this.demoTime !== null && this.demoTime >= DEMO_DURATION - 1e-9) {
       this.demoTime = null; this.running = false; this.record();
     }
@@ -110,6 +136,7 @@ export class Simulation {
   snapshot() {
     return { ...ratios(Math.tanh(this.eta)), ...this.clocks, eta: this.eta, running: this.running,
       target: this.input.targetBeta, transitioning: this.ramp !== null, demoTime: this.demoTime,
+      burstPhase: this.burst?.phase ?? null, burstTime: this.burst?.time ?? null,
       lookYaw: this.input.lookYaw, lookPitch: this.input.lookPitch, opticalBaseline: this.opticalBaseline,
       tourStage: this.demoTime === null ? '' : CUES[Math.max(0, this.cue - 1)].stage,
       historyCount: this.history.length };

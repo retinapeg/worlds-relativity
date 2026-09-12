@@ -33,8 +33,9 @@ void main() {
   vec2 skyUv = vec2(atan(source.z,source.x)/6.28318530718+0.5, asin(clamp(source.y,-1.0,1.0))/3.14159265359+0.5);
   vec3 base = texture2D(skyMap,skyUv).rgb;
   vec4 colour = shiftedSpectrum(5800.0,D);
-  // The nebula is a procedural background with an illustrative spectral tint.
-  vec3 light = spectral ? base*colour.rgb*colour.a*1.6 : base*frequencyColour(D)*1.4;
+  // Low illustrative nebula exposure preserves the finite course's edge contrast.
+  // It is a qualitative background tint, not relativistic surface brightness.
+  vec3 light = spectral ? base*colour.rgb*colour.a*0.12 : base*frequencyColour(D)*0.10;
   gl_FragColor = vec4(light,1.0);
   #include <colorspace_fragment>
 }
@@ -108,6 +109,38 @@ varying float vD, vIntensity;
 ${colourGLSL}
 void main() {
   gl_FragColor = vec4(frequencyColour(vD), vIntensity);
+  #include <colorspace_fragment>
+}
+`;
+
+export const courseVertex = /* glsl */ `
+uniform float eta, observerX;
+attribute float intensity;
+varying float vD, vIntensity;
+${photonGLSL}
+void main() {
+  // Stationary source positions equal their retarded emission positions. Only
+  // observer translation changes the source ray; use the same photon kernel once.
+  vec3 relative = position - vec3(observerX, 0.0, 0.0);
+  float distanceSquared = dot(relative, relative);
+  if (distanceSquared < 1e-12) {
+    vD = 1.0; vIntensity = 0.0; gl_Position = vec4(2.0, 2.0, 2.0, 1.0); return;
+  }
+  vec4 ray = observeRay(relative * inversesqrt(distanceSquared), eta);
+  vD = ray.w; vIntensity = intensity;
+  // Homogeneous clipping safely handles segments crossing the camera plane.
+  // Geometry has already been subdivided, so projected chords follow optical arcs.
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(ray.xyz, 1.0);
+}
+`;
+export const courseFragment = /* glsl */ `
+varying float vD, vIntensity;
+${colourGLSL}
+void main() {
+  // White-biased educational colour preserves edge contrast. This display-only
+  // exposure does not alter D and is not an exact radiometric brightness law.
+  vec3 colour = mix(frequencyColour(vD), vec3(0.78, 0.86, 0.95), 0.24);
+  gl_FragColor = vec4(colour, vIntensity);
   #include <colorspace_fragment>
 }
 `;

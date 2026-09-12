@@ -1,6 +1,6 @@
 # Worlds / Relativity Drive
 
-A special-relativity cockpit with a deterministic local starfield and a separate
+A special-relativity cockpit with a deterministic moving gate course, starfield and a separate
 Reactor HappyOyster directing world. The local measurements work without provider
 access. React + TypeScript + Three.js; one small FastAPI token bridge.
 
@@ -37,6 +37,10 @@ Provider keys never go in `VITE_*`, browser source, Git or logs.
   are illustrative, not a propulsion or realistic acceleration programme. Adjacent
   clocks and tick indicators use actual accumulated times. The 60-lab-second
   comparison is calculated at the current constant speed, not elapsed journey time.
+- **BURST TO 0.999c** or Space runs a finite acceleration/coast/brake programme.
+  P pauses; manual slider/presets cancel; reset clears it. Position and clocks
+  keep their history. The stationary gates and truss use light-second scene units,
+  spaced 0.45 light-seconds apart, and receive the existing photon transform once.
 - Set β from 0 to 0.999, or use REST, 0.6, 0.95, 0.99 and 0.999 presets.
   The prominent 99.9% action immediately selects the strong comparison. The lab ruler measures a 100 m
   moving craft at simultaneous lab times. Its side-on ghost and ruler stay fixed;
@@ -51,9 +55,12 @@ Provider keys never go in `VITE_*`, browser source, Git or logs.
   while disabling only the optical boost, without resetting journey clocks.
   The optional 54-second tour uses prescribed 0.8-second rapidity ramps and ends
   paused at 0.999c. Manual speed, view or baseline controls interrupt the tour.
-- **Start world** creates one stable cockpit/starfield world. A settled speed change
-  sends a deterministic artistic direction; one request may be in flight and only
+- **Generate & enter Reactor world** connects and creates or reattaches a compatible
+  orbital-gate world after a deliberate user action. Cruise, burst, brake and view
+  changes send coalesced artistic directions; one request may be in flight and only
   the latest pending direction is retained. **Stop world** ends travel and disconnects.
+  A live attempt still requires remaining explicit spending approval; page load
+  never allocates a world. Advancing decoded frames are required before Live.
 - Video is an **AI-generated illustration — not an exact relativistic optical
   rendering.** Numerical overlays always come from our local physics. An explicit
   provider acceptance is distinguished from its scheduled instruction timeline.
@@ -63,17 +70,20 @@ Provider keys never go in `VITE_*`, browser source, Git or logs.
 ```sh
 ./scripts/npm.sh test
 ./scripts/npm.sh run typecheck
-./scripts/npm.sh run build
+./scripts/npm.sh run build -- --outDir build/relativity-flythrough-candidate
 .venv/bin/python -m pytest tests/test_backend.py tests/test_runware.py -q
 ```
 
-Candidate output: `build/relativity-candidate`. The Vite config serves and copies
+Fly-through candidate output: `build/relativity-flythrough-candidate`, preview port
+4175. Preserve the earlier `build/relativity-candidate` at port 4174. The Vite config serves and copies
 both existing Reactor SDK WASM artifacts; it does not build a new WASM toolchain.
 The version-checked prepare script patches three vendor expressions to use HTTPS
 media signalling and its DNS route on localhost. It runs before dev/build and
 fails if the expected SDK source changes. No TLS validation is bypassed.
 The preserved C++ core has its own existing native/WASM test scripts.
-The final gate and evidence are in QA.md and build/evidence/final-verification.json.
+The current gate and recording are in QA.md and
+`build/evidence/flythrough/final-verification.json`. The earlier verification receipt
+belongs to preserved commit 2f362600, not this candidate.
 HANDOFF.md is the consolidated current status.
 
 ## Protected Modal bridge
@@ -86,7 +96,8 @@ Health, anonymous rejection and protected scoped token exchange were tested.
 .venv/bin/python -m modal deploy -m backend.modal_app
 ```
 
-Only the primary Reactor key and bridge secret are provided to Modal. The public
+The primary Reactor key, bridge secret and user-supplied Runware key are provided
+to the existing Modal secret. Runware generation allowance remains zero. The public
 token endpoint requires `X-Demo-Access`; the local Vite proxy supplies it server-side.
 A custom client header prevents simple cross-origin browser POSTs. No permissive
 CORS policy is enabled. JWTs are scoped to the director model, one Reactor session,
@@ -98,8 +109,8 @@ The local frontend now routes through this Modal backend using the server-side
 
 Runware is wired into the protected backend for a single cached 1024×576 starting
 image, passed to HappyOyster as its first frame and video poster. No image has been
-generated: `RUNWARE_API_KEY` is absent and `RUNWARE_GENERATION_ALLOWANCE=0`. Generation
-requires a server-side key and explicit spending scope. A persistent Modal volume
+generated: the saved server-side key is now configured on Modal, but
+`RUNWARE_GENERATION_ALLOWANCE=0`. Generation still requires explicit spending scope. A persistent Modal volume
 retains the request reservation and image; uncertain requests never auto-retry.
 
 ## Frozen offline fallback

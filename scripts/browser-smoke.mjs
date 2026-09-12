@@ -9,7 +9,7 @@ import { execFileSync } from 'node:child_process';
 const require = createRequire(import.meta.url);
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const origin = process.env.DEMO_URL || 'http://127.0.0.1:5173';
-const folder = resolve('build/evidence');
+const folder = resolve(process.env.QA_OUTPUT_DIR || 'build/evidence');
 const label = process.env.QA_LABEL || 'qa-candidate';
 assert.match(label, /^[a-zA-Z0-9_-]+$/);
 const sourceRevision = execFileSync('git', ['rev-parse', 'HEAD'], { encoding:'utf8' }).trim();

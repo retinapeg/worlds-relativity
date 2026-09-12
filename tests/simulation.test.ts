@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest';
 import { advanceRamp, ZERO_CLOCK } from '../src/physics/relativity';
-import { DEMO_DURATION, Simulation } from '../src/controls/simulation';
+import { BURST_BASELINE, DEMO_DURATION, Simulation } from '../src/controls/simulation';
 import { FrameClock } from '../src/controls/frameClock';
 
 it('integrates a changing-velocity interval independently of frame rate', () => {
@@ -108,4 +108,106 @@ it('baseline and camera preserve physical state, and .999 changes future clock r
   s.advance(60);
   expect(s.clocks.proper - 18).toBeCloseTo(2.682610668732977, 12);
   s.reset(); expect(s.opticalBaseline).toBe(false); expect(s.input.lookYaw).toBe(0);
+});
+
+it('bursts continuously from rest, coasts, brakes and keeps flying at low speed', () => {
+  const s = new Simulation(); s.advance(5);
+  const before = { ...s.clocks };
+  s.startBurst();
+  expect(s.clocks).toEqual(before);
+  expect(s.snapshot()).toMatchObject({ beta: 0, burstPhase: 'ACCELERATING', burstTime: 0 });
+  s.advance(0.4);
+  expect(s.eta).toBeCloseTo(Math.atanh(0.999) / 2, 12);
+  s.advance(0.4);
+  expect(s.snapshot()).toMatchObject({ burstPhase: 'COASTING', transitioning: false });
+  expect(s.snapshot().beta).toBeCloseTo(0.999, 12);
+  const position = s.clocks.position;
+  s.advance(1.5);
+  expect(s.clocks.position - position).toBeCloseTo(1.5 * 0.999, 12);
+  expect(s.snapshot().burstPhase).toBe('BRAKING');
+  s.advance(0.4);
+  expect(s.eta).toBeCloseTo((Math.atanh(0.999) + Math.atanh(BURST_BASELINE)) / 2, 12);
+  s.advance(0.4);
+  expect(s.snapshot()).toMatchObject({ burstPhase: null, burstTime: null, transitioning: false, running: true });
+  expect(s.snapshot().beta).toBeCloseTo(BURST_BASELINE, 12);
+  const recovery = { ...s.clocks };
+  s.advance(2);
+  expect(s.clocks.position - recovery.position).toBeCloseTo(2 * BURST_BASELINE, 12);
+  expect(s.clocks.proper - recovery.proper).toBeCloseTo(2 * Math.sqrt(1 - BURST_BASELINE ** 2), 12);
+});
+
+it('brakes before a new burst at .999 without resetting the journey or repeating automatically', () => {
+  const s = new Simulation(); s.setVelocity(0.999); s.advance(8);
+  const before = { ...s.clocks };
+  s.startBurst();
+  expect(s.clocks).toEqual(before);
+  expect(s.snapshot().burstPhase).toBe('BRAKING');
+  expect(s.snapshot().beta).toBeCloseTo(0.999, 12);
+  s.advance(0.8);
+  expect(s.snapshot().burstPhase).toBe('ACCELERATING');
+  expect(s.snapshot().beta).toBeCloseTo(BURST_BASELINE, 12);
+  s.advance(0.8);
+  expect(s.snapshot().burstPhase).toBe('COASTING');
+  expect(s.snapshot().beta).toBeCloseTo(0.999, 12);
+  s.advance(2.3);
+  expect(s.snapshot().burstPhase).toBeNull();
+  s.advance(20);
+  expect(s.snapshot().beta).toBeCloseTo(BURST_BASELINE, 12);
+  expect(s.clocks.lab).toBeCloseTo(before.lab + 23.9, 10);
+  expect(s.clocks.position).toBeGreaterThan(before.position);
+});
+
+it('integrates each finite burst identically across frame rates and long frames', () => {
+  // Independent analytic totals: the .8 s linear-rapidity intervals, 1.5 s
+  // at .999, then .2 until t=10. High starts include one extra braking interval.
+  for (const [initial, proper, position] of [
+    [0, 7.443505986164453, 4.21920182123867],
+    [0.999, 6.927583881561571, 4.778043604509672],
+  ]) {
+    for (const hz of [0.1, 30, 60, 144]) {
+      const s = new Simulation(); s.setVelocity(initial); s.startBurst();
+      for (let i = 0; i < 10 * hz; i++) {
+        s.advance(1 / hz);
+        const snapshot = s.snapshot();
+        expect(snapshot.beta).toBeGreaterThanOrEqual(0);
+        expect(snapshot.beta).toBeLessThanOrEqual(0.999);
+        expect(Number.isFinite(snapshot.position)).toBe(true);
+      }
+      expect(s.clocks.lab).toBeCloseTo(10, 9);
+      expect(s.clocks.proper).toBeCloseTo(proper, 9);
+      expect(s.clocks.position).toBeCloseTo(position, 9);
+      expect(s.snapshot().burstPhase).toBeNull();
+    }
+  }
+});
+
+it('pauses a burst exactly, cancels on manual throttle and clears it on reset', () => {
+  const s = new Simulation(); s.startDemo(); s.advance(12); s.startBurst();
+  expect(s.demoTime).toBeNull();
+  s.advance(0.25); s.running = false;
+  const paused = s.snapshot(); s.advance(1000);
+  expect(s.snapshot()).toEqual(paused);
+  s.running = true; s.advance(0.25);
+  expect(s.snapshot().burstTime).toBeCloseTo(0.5, 12);
+  const clocks = { ...s.clocks };
+  s.setVelocity(0.6);
+  expect(s.clocks).toEqual(clocks);
+  expect(s.snapshot()).toMatchObject({ burstPhase: null, burstTime: null, transitioning: false });
+  s.advance(1); expect(s.snapshot().beta).toBeCloseTo(0.6, 12);
+  s.startBurst(); s.advance(0.2); s.reset();
+  expect(s.snapshot()).toMatchObject({ beta: 0, burstPhase: null, burstTime: null, running: false });
+  expect(s.clocks).toEqual(ZERO_CLOCK);
+});
+
+it('camera and optical baseline compare the same continuing burst flight', () => {
+  const a = new Simulation(), b = new Simulation();
+  a.startBurst(); b.startBurst(); a.advance(0.3); b.advance(0.3);
+  const before = a.snapshot();
+  a.setLook(Math.PI / 2, 0.2); a.setOpticalBaseline(true);
+  for (const key of ['beta', 'lab', 'proper', 'position', 'burstPhase', 'burstTime', 'transitioning'] as const)
+    expect(a.snapshot()[key]).toBe(before[key]);
+  a.advance(2.3); b.advance(2.3);
+  expect(a.clocks).toEqual(b.clocks);
+  expect(a.eta).toBe(b.eta);
+  expect(a.snapshot().burstPhase).toBe(b.snapshot().burstPhase);
 });

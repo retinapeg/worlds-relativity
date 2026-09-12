@@ -1,10 +1,11 @@
-export type BrowserToken = { jwt: string; expires_at: number };
+export type BrowserToken = { jwt: string; expires_at: number; hosting?: string | null };
 export function createTokenResolver() {
   const connection_id = crypto.randomUUID();
   let cached: BrowserToken | null = null;
   let pending: Promise<BrowserToken> | null = null;
   return {
     expiry: () => cached?.expires_at ?? null,
+    hosting: () => cached?.hosting ?? null,
     resolve: async () => {
       if (cached) {
         if (Date.now() >= (cached.expires_at - 10) * 1000) throw new Error('Session token expired. Stop and explicitly restart the world.');
@@ -17,7 +18,7 @@ export function createTokenResolver() {
         const data = await response.json();
         if (!response.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'The token bridge is unavailable.');
         if (typeof data.jwt !== 'string' || !Number.isFinite(data.expires_at)) throw new Error('Invalid token response.');
-        return data as BrowserToken;
+        return { ...data, hosting: response.headers.get('X-Relativity-Backend') } as BrowserToken;
       });
       try { cached = await pending; return cached.jwt; }
       finally { pending = null; }

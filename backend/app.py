@@ -75,6 +75,7 @@ async def token(body: TokenRequest, response: Response,
     secret = os.getenv("DEMO_ACCESS_TOKEN", "")
     if not secret or not hmac.compare_digest(x_demo_access, secret) or x_relativity_client != "1":
         raise HTTPException(403, "Token endpoint requires the protected local application bridge.")
+    response.headers["X-Relativity-Backend"] = "modal" if os.getenv("WORLD_ASSET_VOLUME") else "local"
     identity = str(body.connection_id)
     # Coalesce repeated SDK actions, preserving the JWT bound to this session.
     async with lock:

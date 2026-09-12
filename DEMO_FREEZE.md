@@ -1,5 +1,21 @@
 # DEMO FREEZE
 
+## Current fly-through candidate — bounded user override at 15:45 BST
+
+The latest explicit brief permits a stationary finite course and a short burst,
+superseding the feature freeze below for this work only. Use the existing verified
+numerical engine and position accumulator. Target integration by 16:10 BST and
+regression, actual motion recording and handoff by 16:20; present at 16:30.
+Once this bounded change works, stop feature work.
+
+Preserve source commit 2f3626007fa3b01b0a839002e5ebcdf382930fe9 and its runtime
+at build/relativity-candidate (preview 4174). A copy and its verification receipt
+are retained under build/checkpoints/2f362600/. New builds use only
+build/relativity-flythrough-candidate (preview 4175). The original immutable
+releases/20260912T110958Z fallback and its 4173 launcher remain untouched.
+Current fly-through evidence belongs under build/evidence/flythrough; do not
+combine it with the prior candidate's final-verification.json.
+
 ## Active candidate — controlled finalisation, 12 September 2026
 
 HANDOFF.md is the single current status. The later visual-priority candidate has 0–0.999 controls,

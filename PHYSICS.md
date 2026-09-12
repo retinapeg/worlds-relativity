@@ -59,8 +59,8 @@ seconds. Returning to rest never recomputes past proper time.
 
 Manual controls change immediately between constant-speed segments and interrupt
 the tour. These are labelled illustrative changes of velocity, not a dynamical
-acceleration model. Only the optional tour prescribes linear rapidity over
-0.8 lab seconds, with no dynamics.
+acceleration model. The optional tour and short burst prescribe linear rapidity
+over 0.8 lab seconds, with no dynamics.
 Over a ramp from eta0 to eta1 lasting dt:
 
 ```
@@ -77,6 +77,14 @@ clock totals, positions and segment endpoints. The revised 54-second tour reache
 paused at 0.999c at 54 seconds. Manual speed, view or baseline control interrupts
 the automated sequence. A visibility boundary resets the
 wall-clock timestamp. Long hidden intervals do not advance this educational timeline.
+
+The finite burst uses the same ramp integrator and historical accumulators: from
+low speed, ramp to 0.999c in 0.8 lab seconds, hold for 1.5, then ramp to 0.2c in
+0.8 and continue cruising. A start above 0.2c first brakes to 0.2c over 0.8 seconds.
+Position and clocks never reset during a burst. Manual speed input cancels it;
+pause freezes its phase and all accumulators, reset clears it, and camera or
+optical-baseline changes preserve it. The phase timer schedules transitions only;
+it is advanced by the same lab timestep, not a separate animation clock.
 
 ## Colour approximation
 
@@ -114,11 +122,27 @@ segments retain their endpoints; tour ramps retain samples. x and ct share one
 scale so a light ray is 45 degrees. Hidden-tab intervals are omitted from the
 educational timeline rather than producing a jump on return.
 
-Stationary light beacons are 2 light-seconds apart. Their lab position is fixed
-during light travel; their source directions receive one CPU aberration transform,
-then projection only in the shader. Opacity is illustrative.
+The current fly-through replaces periodic beacons with fixed world geometry:
+double polygon gates every 0.45 light-seconds, a gridded side truss/floor rails and
+eight tilted box frames. All distances use light-seconds, with c = 1 light-second
+per lab second. The course spans x = −1.8 to 72 light-seconds; objects are never
+recycled or teleported. This finite extent eventually ends during a long flight.
+The separate 100 m ruler is not a scale model of this course.
 
-Reactor video occupies a separate panel. It is not transformed as a calibrated
+Each edge is subdivided into at most 0.025-light-second segments. The GPU subtracts
+the current observer x, normalizes the source ray, applies the shared verified
+photon kernel once and then camera projection. No additional 1/gamma scaling is
+applied. Stationary continuously emissive objects have fixed emission positions,
+so no moving-source history is needed. Homogeneous projection clips sampled line
+segments at the camera plane; geometry stays off the observer axis and a
+near-zero-distance guard avoids invalid normalization. Thin wires, sampled curved
+edges, illustrative opacity and white-biased Doppler false colour are display
+approximations, not exact photography or radiometry. The distant nebula exposure
+is reduced to keep nearby geometry legible; raw D and measurements are unchanged.
+
+Reactor remains mounted in a compact status panel until advancing decoded frames
+are observed, then expands into a secondary view. Layout changes neither start
+nor stop provider sessions. It is not transformed as a calibrated
 full-sphere source. Its direction sentence reads the same physics snapshot, but
 it never calculates gamma or supplies numerical overlays. Instruction acceptance
 proves scheduling only, not optical correctness or immediate synchronisation.

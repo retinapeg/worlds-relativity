@@ -1310,3 +1310,91 @@ summary span {
   .impact-layout .source-note { display:none; }
   .impact-layout .footer summary { padding-top:3px; padding-bottom:3px; }
 }
+
+/* Fly-through candidate: the deterministic local flight fills the viewport width.
+   The persistent Reactor component expands only after real video frames arrive. */
+.flythrough-layout .flight-readout { grid-column:1 / -1; pointer-events:none; }
+.flythrough-layout .flight-readout button { pointer-events:auto; }
+.flythrough-layout .burst-button { margin-top:10px; font-size:16px; background:#cdf6ca; color:#10241b; border-color:#dfffdd; }
+.flythrough-layout .burst-button span { margin-left:12px; font-size:10px; }
+.flythrough-layout .burst-status { display:flex; align-items:center; gap:12px; margin:8px 0 0; font:11px ui-monospace,monospace; }
+.flythrough-layout .burst-status strong { color:#e4c58d; letter-spacing:1px; }
+.flythrough-layout .burst-status span { color:#a9bac4; font-size:10px; }
+.flythrough-layout .instant-experience { margin-top:7px; padding:0; font-size:10px; color:#bad1d9; text-decoration:underline; }
+.flythrough-layout .flight-readout .subtitle { font-size:10px; margin-top:9px; }
+.flythrough-layout .world-panel { position:absolute; grid-column:auto; grid-row:auto; inset:60px 30px auto auto; width:300px; padding:10px 12px; z-index:3; background:#06101de8; }
+.flythrough-layout .world-heading { margin-bottom:6px; }
+.flythrough-layout .world-heading h2 { display:none; }
+.flythrough-layout .world-heading .eyebrow { font-size:8px; letter-spacing:.5px; }
+.flythrough-layout .world-status { font-size:9px; max-width:140px; }
+.flythrough-layout .world-screen { position:absolute; width:1px; height:1px; min-height:0; flex:none; opacity:0; pointer-events:none; }
+.flythrough-layout .world-panel:has(.world-status.live) .world-screen { position:relative; width:100%; height:170px; opacity:1; }
+.flythrough-layout .world-panel:has(.world-placeholder button) .world-screen { position:relative; width:100%; height:38px; opacity:1; pointer-events:auto; }
+.flythrough-layout .world-panel:has(.world-placeholder button) .world-placeholder { padding:4px; }
+.flythrough-layout .world-panel:has(.world-placeholder button) .world-placeholder h3,
+.flythrough-layout .world-panel:has(.world-placeholder button) .world-placeholder p { display:none; }
+.flythrough-layout .ai-label { font-size:9px; margin:3px 0; }
+.flythrough-layout .artwork-status { font-size:9px; margin:0 0 4px; }
+.flythrough-layout .direction-status { padding-top:4px; font-size:9px; }
+.flythrough-layout .direction-status small { font-size:8px; }
+.flythrough-layout .world-controls button { padding:4px 8px; font-size:10px; }
+.flythrough-layout .world-diagnostics summary { font-size:9px; padding-top:4px; }
+.flythrough-layout .world-diagnostics[open] { background:#071421; }
+@media(min-width:901px) {
+  .flythrough-layout { min-height:720px; grid-template-rows:32px minmax(220px,1fr) 270px 112px 22px; gap:8px; padding:12px 20px; }
+  .flythrough-layout #universe,.flythrough-layout .cockpit { left:20px; top:52px; width:calc(100% - 40px); height:calc(100% - 492px); min-height:220px; }
+  .flythrough-layout .flight-readout { padding:10px 12px; background:linear-gradient(90deg,#0208109e,transparent 38%); }
+  .flythrough-layout .velocity { font-size:58px; }
+  .flythrough-layout .gamma { margin-top:4px; }
+  .flythrough-layout .flight-readout h1 { display:none; }
+  .flythrough-layout .doppler { right:12px; top:auto; bottom:12px; gap:20px; }
+  .flythrough-layout .frequency-note { display:none; }
+  .flythrough-layout .sight { left:50%; top:calc(50% - 194px); }
+  .flythrough-layout .view-strip { left:calc(50% - 155px); top:auto; bottom:440px; width:310px; }
+  .flythrough-layout .view-strip button { padding:5px 12px; }
+  .flythrough-layout .view-strip .baseline-button { padding:6px; }
+  .flythrough-layout .measurement-panel,.flythrough-layout .time-panel { padding:12px 20px; }
+  .flythrough-layout .length-headline { margin-top:4px; }
+  .flythrough-layout .length-headline>b { font-size:46px; }
+  .flythrough-layout .shorter { font-size:14px; margin-top:3px; }
+  .flythrough-layout .ruler { height:103px; }
+  .flythrough-layout .rest-label { margin-top:6px; }
+  .flythrough-layout .rate-statement { margin-top:7px; }
+  .flythrough-layout .rate-statement>strong { font-size:35px; }
+  .flythrough-layout .clock-pair { margin-top:8px; }
+  .flythrough-layout .clock>svg { width:52px; }
+  .flythrough-layout .tick-note { margin:8px 0; }
+  .flythrough-layout .constant-comparison { padding-top:8px; }
+  .flythrough-layout .throttle { padding:8px 15px; }
+  .flythrough-layout .throttle input { display:block; height:18px; margin:0; }
+  .flythrough-layout .transport button { padding:3px 10px; }
+  .flythrough-layout .presets button { padding:5px 14px; }
+  .flythrough-layout .demo-button { padding:5px 14px; }
+  .flythrough-layout .tour-caption { margin-top:5px; }
+  .flythrough-layout .footer summary { padding-top:3px; padding-bottom:3px; }
+}
+@media(max-width:900px) {
+  .flythrough-layout { grid-template-rows:42px 420px 310px 290px 145px 40px; min-height:1320px; }
+  .flythrough-layout #universe,.flythrough-layout .cockpit { height:420px; }
+  .flythrough-layout .world-panel { top:270px; right:24px; width:270px; }
+  .flythrough-layout .view-strip { top:350px; left:24px; width:230px; right:auto; }
+  .flythrough-layout .doppler { top:16px; right:10px; }
+  .flythrough-layout .sight { top:295px; }
+  .flythrough-layout .throttle { grid-row:5; }
+  .flythrough-layout .footer { grid-row:6; }
+}
+@media(min-width:901px) and (max-height:800px) {
+  .flythrough-layout .velocity { font-size:46px; line-height:1; }
+  .flythrough-layout .gamma b { font-size:19px; }
+  .flythrough-layout .burst-button { padding:9px 12px; margin-top:7px; font-size:14px; }
+  .flythrough-layout .burst-status { margin-top:6px; font-size:10px; }
+  .flythrough-layout .instant-experience { margin-top:4px; font-size:9px; }
+  .flythrough-layout .flight-readout .subtitle { margin-top:5px; font-size:9px; }
+  .flythrough-layout .world-panel { padding:6px 10px; }
+  .flythrough-layout .world-heading { margin-bottom:4px; }
+  .flythrough-layout .world-panel .ai-label { font-size:8px; line-height:1.2; margin:2px 0; }
+  .flythrough-layout .world-controls button { padding:3px 6px; }
+  .flythrough-layout .world-diagnostics summary { padding-top:2px; }
+  .flythrough-layout .world-panel .direction-status { display:none; }
+  .flythrough-layout .world-panel:has(.world-diagnostics[open]) .direction-status { display:block; }
+}

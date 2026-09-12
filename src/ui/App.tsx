@@ -95,6 +95,7 @@ export function App() {
   const look = (yaw: number) => { simulation.setLook(yaw); refresh(); };
   const reset = () => { simulation.reset(); refresh(); };
   const experience = () => { simulation.setVelocity(MAX_BETA); simulation.opticalBaseline = false; simulation.running = true; refresh(); };
+  const burst = () => { simulation.startBurst(); refresh(); };
   const demo = () => {
     if (simulation.demoTime !== null) { simulation.stopDemo(); simulation.running = false; }
     else simulation.startDemo();
@@ -105,8 +106,8 @@ export function App() {
   const fill = snapshot.target / MAX_BETA * 100;
   const tour = snapshot.demoTime !== null;
 
-  return <main className="experience impact-layout">
-    <canvas ref={canvas} id="universe" tabIndex={0} aria-label="Interactive relativistic starfield. Drag to look around. Velocity remains along lab +X." />
+  return <main className="experience impact-layout flythrough-layout">
+    <canvas ref={canvas} id="universe" tabIndex={0} aria-label="Relativistic flight through stationary gates and a gridded station. Drag to look around. Velocity remains along lab +X." />
     <div className="shade" aria-hidden="true" />
     <svg className="cockpit" viewBox="0 0 1440 900" preserveAspectRatio="none" aria-hidden="true">
       <path d="M0 84L26 112V575L65 620H235L275 654M1440 84L1414 112V575L1375 620H1205L1165 654" />
@@ -121,11 +122,13 @@ export function App() {
 
     <section className="flight-readout overlay" aria-label="Spacecraft velocity">
       <p className="eyebrow">OBSERVER VELOCITY / LAB +X</p>
-      <div className="velocity"><output data-testid="beta">{snapshot.beta.toFixed(3)}</output><span>c</span></div>
+      <div className="velocity"><output data-testid="beta" data-beta={snapshot.beta}>{snapshot.beta.toFixed(3)}</output><span>c</span></div>
       <div className="gamma"><span>LORENTZ FACTOR</span><b>γ <output data-testid="gamma">{snapshot.gamma.toFixed(3)}</output></b></div>
       <h1>{stage}</h1>
-      <button className="experience-button" onClick={experience} disabled={!!error}>Experience 99.9% of light speed <span>↗</span></button>
-      <p className="subtitle">Lab distance <output data-testid="distance">{snapshot.position.toFixed(2)}</output> light-seconds · fixed +X velocity</p>
+      <button className="experience-button burst-button" onClick={burst} disabled={!!error}>BURST TO 0.999c <span>SPACE ↗</span></button>
+      <p className="burst-status"><strong data-testid="burst-phase" data-phase={snapshot.burstPhase ?? ''} data-burst-time={snapshot.burstTime ?? ''}>{snapshot.burstPhase ?? (snapshot.running ? 'CRUISING' : 'READY TO FLY')}</strong><span>Illustrative acceleration</span></p>
+      <button className="instant-experience" onClick={experience} disabled={!!error}>Experience 99.9% of light speed instantly</button>
+      <p className="subtitle">Lab distance <output data-testid="distance" data-position={snapshot.position}>{snapshot.position.toFixed(2)}</output> light-seconds · gates every 0.45 ls</p>
       <div className="doppler"><span>AHEAD · APPROACH <b data-testid="doppler-forward">{snapshot.approach.toFixed(2)}×</b><Wavelength doppler={snapshot.approach} /></span>
         <span>BEHIND · RECEDE <b data-testid="doppler-rear">{snapshot.recede.toFixed(3)}×</b><Wavelength doppler={snapshot.recede} /></span></div>
       <small className="frequency-note">Observed / emitted frequency · illustrative colour</small>
@@ -184,21 +187,22 @@ export function App() {
 
     <footer className="footer overlay"><div><div className="colour-key"><span>REDSHIFT</span><i /><span>BLUESHIFT</span></div>
       <span className="colour-label">{spectral ? 'Approximate spectra · illustrative exposure, not literal eye appearance' : 'Doppler false colour — not literal eye appearance'}</span>
-      <span className="source-note">{STAR_COUNT.toLocaleString()} SYNTHETIC STARS{spectral ? ' · APPROXIMATE SPECTRA' : ' · FREQUENCY COLOURS'} · BEACONS FIXED IN LAB</span></div>
+      <span className="source-note">{STAR_COUNT.toLocaleString()} SYNTHETIC STARS · STATIONARY LAB COURSE · 1 LIGHT-SECOND = c × 1 LAB SECOND</span></div>
       <details><summary>Display & science <span>+</span></summary><div className="details-panel">
         <h2>Light, from a moving frame.</h2>
         <label><input type="checkbox" checked={spectral} onChange={e => { setSpectral(e.target.checked); settings.current.spectral = e.target.checked; }} /> Approximate stellar spectra</label>
         <label><input type="checkbox" checked={guides} onChange={e => { setGuides(e.target.checked); settings.current.guides = e.target.checked; }} /> Angular reference rings</label>
-        <label><input type="checkbox" checked={beacons} onChange={e => { setBeacons(e.target.checked); settings.current.beacons = e.target.checked; }} /> Flight corridor of stationary beacons</label>
+        <label><input type="checkbox" checked={beacons} onChange={e => { setBeacons(e.target.checked); settings.current.beacons = e.target.checked; }} /> Stationary gates and gridded flight course</label>
         <p>Velocity is along lab +X. Rays point toward sources. The shader applies the photon boost once; camera rotation changes only your view.</p>
         <p>Stellar colour uses three blackbody samples with T′ = D·T. Brightness is compressed for visibility. The nebula tint is illustrative. No exact eye rendering or photometry.</p>
-        <p>Flight beacons are stationary in the lab, 2 light-seconds apart. Your position follows dx/dt = βc. Their emission positions stay fixed during light travel; the CPU computes their approaching and receding rays. Beacon colours map log(D), with fixed illustrative opacity and display saturation at ¼× / 4×.</p>
-        <p>Manual speed changes are idealised constant-speed segments; the optional tour uses prescribed transitions. Proper time integrates the whole history. No propulsion or acceleration dynamics. Local clocks suspend while this tab is hidden.</p>
+        <p>The fixed course contains polygonal gates 0.45 light-seconds apart, a gridded side truss and tilted boxes. Your position follows dx/dt = βc with c = 1 light-second per lab second. Each sampled edge point supplies a ray from your current position; the photon transform runs once, followed by camera projection. No extra length squeeze is applied.</p>
+        <p>Course structures are stationary emitters, so their emission positions do not move during light travel. Thin sampled wires, finite course extent, illustrative exposure and false colour simplify the image. This is not exact photographic rendering of moving objects.</p>
+        <p>SPACE launches a short burst: accelerate, coast at 0.999c, then brake to 0.2c. If already fast, it brakes first. This is illustrative acceleration prescribed in rapidity, not propulsion dynamics. Clocks integrate the same velocity history used for translation. Manual speed changes cancel the burst; pause freezes it. The optional tour also uses prescribed transitions. Local clocks suspend while this tab is hidden.</p>
         <p>Optional angular reference rings mark catalogue sky angles. The separate craft silhouette measures a 100 m craft at simultaneous lab times, not its optical image. We never squeeze the starfield to imitate length contraction.</p>
         <p>The optical baseline turns off the photon transform using the same camera, source positions and current lab position. It never resets or changes the journey clocks or measured ship length. False colours saturate at ¼× / 4× for readability; numerical wavelengths stay unclamped.</p>
         <Minkowski history={simulation.history} t={snapshot.lab} x={snapshot.position} />
         <dl><dt>Graphics</dt><dd>{ready ? `WebGL2 · ${fps} fps` : 'Initialising'}</dd><dt>Photon check</dt><dd>{gpu}</dd><dt>Clock history</dt><dd>{snapshot.historyCount} segment endpoints preserved</dd></dl>
-        <p className="keyboard">SPACE pause / run · D demo · R reset · F forward</p>
+        <p className="keyboard">SPACE burst · P pause / run · D tour · R reset · F forward</p>
       </div></details>
     </footer>
     {!ready && !error && <div className="loading overlay" role="status">Preparing your local universe…</div>}

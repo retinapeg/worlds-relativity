@@ -1,11 +1,11 @@
-import { AdditiveBlending, BufferAttribute, BufferGeometry, DynamicDrawUsage, Camera, DataTexture, LinearFilter, LineSegments, Matrix3, Mesh, NoToneMapping,
+import { AdditiveBlending, BufferAttribute, BufferGeometry, Camera, DataTexture, LinearFilter, LineSegments, Matrix3, Mesh, NoToneMapping,
   PerspectiveCamera, PlaneGeometry, Points, RGBAFormat, Scene, ShaderMaterial, Vector3, WebGLRenderer, type Texture } from 'three';
 import type { ControlInput } from '../controls/simulation';
 import type { SceneSource } from '../sceneSources/procedural';
 import { spectrumTable, SPECTRUM_SIZE } from './spectrum';
-import { beaconFragment, beaconVertex, guideFragment, guideVertex, quadVertex, skyFragment, starFragment, starVertex } from './shaders';
+import { courseFragment, courseVertex, guideFragment, guideVertex, quadVertex, skyFragment, starFragment, starVertex } from './shaders';
 import { checkPhotonShader } from './gpuCheck';
-import { BeaconRays } from '../physics/beacons';
+import { createCourse } from '../sceneSources/course';
 
 export class RelativityRenderer {
   private renderer: WebGLRenderer;
@@ -18,15 +18,12 @@ export class RelativityRenderer {
   private look = new Vector3();
   private materials: ShaderMaterial[] = [];
   private guides: LineSegments;
-  private beaconRays = new BeaconRays();
   private beaconGeometry = new BufferGeometry();
   private beacons: LineSegments;
-  private lastBeaconEta = NaN;
-  private lastBeaconPosition = NaN;
   private uniforms = {
     eta: { value: 0 }, pixelRatio: { value: 1 }, aspect: { value: 1 }, tanHalfFov: { value: Math.tan(40 * Math.PI / 180) },
     cameraBasis: { value: new Matrix3() }, skyMap: { value: null as Texture | null },
-    spectrumMap: { value: this.spectrum }, spectral: { value: true },
+    spectrumMap: { value: this.spectrum }, spectral: { value: true }, observerX: { value: 0 },
   };
   readonly gpuCheck: string;
   constructor(private canvas: HTMLCanvasElement, private source: SceneSource) {
@@ -50,10 +47,10 @@ export class RelativityRenderer {
     const guides = material(guideVertex, guideFragment); guides.transparent = true;
     this.guides = new LineSegments(source.guides, guides); this.guides.frustumCulled = false;
     this.scene.add(this.guides);
-    this.beaconGeometry.setAttribute('position', new BufferAttribute(this.beaconRays.positions, 3).setUsage(DynamicDrawUsage));
-    this.beaconGeometry.setAttribute('doppler', new BufferAttribute(this.beaconRays.dopplers, 1).setUsage(DynamicDrawUsage));
-    this.beaconGeometry.setAttribute('intensity', new BufferAttribute(this.beaconRays.intensities, 1).setUsage(DynamicDrawUsage));
-    const beaconMaterial = material(beaconVertex, beaconFragment);
+    const course = createCourse();
+    this.beaconGeometry.setAttribute('position', new BufferAttribute(course.positions, 3));
+    this.beaconGeometry.setAttribute('intensity', new BufferAttribute(course.intensities, 1));
+    const beaconMaterial = material(courseVertex, courseFragment);
     beaconMaterial.transparent = true;
     this.beacons = new LineSegments(this.beaconGeometry, beaconMaterial);
     this.beacons.frustumCulled = false;
@@ -73,12 +70,8 @@ export class RelativityRenderer {
     this.camera.lookAt(this.look); this.camera.updateMatrixWorld();
     this.uniforms.cameraBasis.value.setFromMatrix4(this.camera.matrixWorld);
     this.uniforms.eta.value = eta; this.uniforms.spectral.value = spectral; this.guides.visible = showGuides;
+    this.uniforms.observerX.value = position;
     this.beacons.visible = showBeacons;
-    if (showBeacons && (eta !== this.lastBeaconEta || position !== this.lastBeaconPosition)) {
-      this.beaconRays.update(position, Math.tanh(eta));
-      for (const attribute of Object.values(this.beaconGeometry.attributes)) attribute.needsUpdate = true;
-      this.lastBeaconEta = eta; this.lastBeaconPosition = position;
-    }
     this.renderer.clear(); this.renderer.render(this.sky, this.fullscreenCamera); this.renderer.render(this.scene, this.camera);
   }
   dispose() {

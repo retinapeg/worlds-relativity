@@ -15,7 +15,7 @@ const sourceChanges = execFileSync('git', ['status', '--porcelain'], { encoding:
 if (process.env.REQUIRE_CLEAN === '1') assert.equal(sourceChanges, '', 'preflight requires committed source');
 const report = { kind:'LOCAL SYNTHETIC MEDIA — NOT REACTOR PLAYBACK', sourceRevision:revision,
   sourceChanges, checkedAt:new Date().toISOString(), cases:[] };
-const output = resolve('build/evidence'); await mkdir(output, { recursive:true });
+const output = resolve(process.env.QA_OUTPUT_DIR || 'build/evidence'); await mkdir(output, { recursive:true });
 const replacement = resolve('tests/fixtures/reactor/sdk.tsx');
 const server = await createServer({ configFile:false, root:process.cwd(), publicDir:false,
   cacheDir:resolve('build/reactor-fixture-vite'), logLevel:'error',
@@ -81,7 +81,7 @@ try {
       await page.waitForFunction(() => Boolean(window.__reactorFixture));
       const setup = ['native-error','stall','unmount'].includes(scenario) ? 'frames' : scenario;
       await page.evaluate(name => window.__reactorFixture.setScenario(name), setup);
-      await page.getByRole('button', { name:'✦ Start world', exact:true }).click();
+      await page.getByRole('button', { name:'✦ Generate & enter Reactor world', exact:true }).click();
       if (scenario === 'play-rejection') {
         await page.getByRole('button', { name:'Play video', exact:true }).waitFor();
         assert.notEqual(await page.getByTestId('world-status').getAttribute('data-state'), 'VIDEO PLAYING');
@@ -165,6 +165,20 @@ try {
       if (!scenario.endsWith('failure') && !['pending-connect','pending-create'].includes(scenario)) assert.ok(result.mocked.end >= 1);
       assert.deepEqual(result.denied, []); assert.deepEqual(result.errors, []);
       assert.deepEqual(result.consoleErrors, []); assert.deepEqual(result.failedRequests, []);
+      if (scenario === 'frames') {
+        // A second explicit start may reuse the persisted world; UI updates above
+        // must still have used exactly one allocation. This restart is deliberate.
+        await page.getByRole('button', { name:'✦ Generate & enter Reactor world', exact:true }).click();
+        await playing(page);
+        const reused = await page.evaluate(() => ({ ...window.__reactorFixture.calls }));
+        assert.equal(reused.connect, 2); assert.equal(reused.createWorld, 1);
+        assert.equal(reused.attachWorld, 1); assert.equal(reused.startTravel, 2);
+        assert.equal(result.mocked.token, 2);
+        await page.getByRole('button', { name:'Stop world', exact:true }).click(); await stopped(page);
+        result.explicitWorldReuse = { calls:reused, cleanup:await cleaned(page) };
+        assert.deepEqual(result.errors, []); assert.deepEqual(result.denied, []);
+        assert.deepEqual(result.consoleErrors, []); assert.deepEqual(result.failedRequests, []);
+      }
       result.passed = true; console.log(`PASS local media fixture: ${scenario}`);
     } finally { await page.close(); }
   }

@@ -4,65 +4,90 @@
 **Live Reactor video remains UNVERIFIED. All previous paid allowances are exhausted.**
 No new live allocation or generation is included in this finalisation.
 
-## Ownership and local checkpoints
+## Current fly-through candidate and ownership
 
-The latest authorisation permits five specialist workers plus the coordinator.
-Actual reused/launched roster (only the coordinator assigns work and changes Git):
+The 15:45 BST user brief authorises the finite moving course and burst as a bounded
+exception to the earlier feature freeze. Target integration by 16:10, final
+regression/recording/handoff by 16:20 and presentation at 16:30. Stop feature work
+as soon as this change is working. All previous physics, secret and fallback
+safeguards remain in force. No new dependency or paid allowance is included.
 
-| Role | Task identifier | Delivered scope / current responsibility |
+| Task | Assignment | Owned files |
 | --- | --- | --- |
-| Coordinator — Implement relativity hackathon MVP | 01a09533-734f-7781-871e-fb1a4854fbf0 | Shared wiring, source integration, documents, checkpoints and integrity receipt |
-| 1 — Configure bounded multi-agent use | 01a09519-d3e4-7c32-adaf-3ff727741b6d | Measurement/clock and initial controls implementation; writes released |
-| 2 — optics | /root/worker2_optics | Renderer verification and bounded display-exposure refinement |
-| 3 — controls | /root/worker3_controls | Manual controls/tour review and exact-cue regression; writes released |
-| 4 — Build Relativity Drive demo | 01a094bb-83c9-7721-a055-9cb64f3d8a07 | Unpaid sponsor review complete; sole executor of any subsequently approved live test |
-| 5 — independent QA | /root/worker5_qa | Canonical final-revision suite, browser checks and evidence inspection |
+| 01a09519-d3e4-7c32-adaf-3ff727741b6d | Current coordinator; final authority | App, styles, documents, integration and all Git operations |
+| /root/physics_audit | Reused scene/renderer worker; writes released | Renderer, shaders, course geometry and focused tests |
+| /root/sponsor_diagnosis | Reused burst/controls worker; writes released | Simulation, desktop controls and focused tests |
+| 01a09533-734f-7781-871e-fb1a4854fbf0 | Reused QA/recording owner | Browser scripts and evidence; no production components |
+| 01a094bb-83c9-7721-a055-9cb64f3d8a07 | Existing sponsor integration owner | Reactor, Runware, backend and focused tests |
 
-The runtime permits three spawned children beside this coordinator. The two reused
-app tasks fill the other roles; six project agents does not mean six are always
-running. Project-local settings enable those three child slots using documented
-keys; no global settings, model, permissions or active session were changed.
-Strict non-overlapping ownership replaces worktree setup for this short pass.
-No worker spawns children. No additional provider spending is authorised.
+Five project tasks were reused; no additional workers or global configuration
+changes were needed. Runtime permits three child slots beside this coordinator.
+The user authorises up to five workers plus the coordinator; inactive workers do
+not need to be restarted. Strict separate file ownership applies. No children
+spawn workers. Only the coordinator performs Git operations.
 
-Recoverable baseline: `7078adaad74e78ae2783c63f8bb34b3ae90b00da` on `main`.
-The completed 0–0.99 consolidation checkpoint is
-`c5669b70343a3f7b7099fa9800250fd44e045a78`; its passing receipt/logs/screenshots are
-preserved under `build/evidence/checkpoint-c5669b7/`. The subsequent visual brief
-is a separate candidate. Its final reviewed source is the ordinary commit shown by
-`git rev-parse HEAD`. Its exact hash, actual results, times and artifact names are
-recorded in `build/evidence/final-verification.json`. Browser runners record the
-revision and require a clean worktree. A receipt is valid only if its revision
-matches HEAD, the worktree is still clean and all required checks passed.
-No push, amend, reset or clean.
+Preserved prior verified source: `2f3626007fa3b01b0a839002e5ebcdf382930fe9`.
+Its runtime remains in `build/relativity-candidate` and a copy plus the receipt is
+under `build/checkpoints/2f362600/`. Older checkpoints `7078ada` and `c5669b7`
+remain in history; their evidence must not be combined with the current pass.
+The current fly-through source is the ordinary local commit reported by
+`git rev-parse HEAD`; its exact revision and final verification belong in
+`build/evidence/flythrough/final-verification.json`. That receipt must match HEAD,
+show a clean source tree and report all required gates passed. No push, amend,
+reset, clean or alteration of a frozen release.
 
 ## Run and protect
 
-- Start: `./scripts/start-dev.sh`; open http://127.0.0.1:5173.
-- The running frontend routes through the retained Modal bridge via server-side
-  `REACTOR_BACKEND_URL`. The optional local 8787 bridge was not running at the
-  finalisation inspection. The start script can start it and reuses the frontend.
-- Existing production preview: http://127.0.0.1:4174. If needed, start with
-  `./scripts/npm.sh run preview -- --port 4174`.
-- Fallback: `./run_demo.sh --known-good`, normally port 4173. No rebuilding or
-  downloads. Never alter `releases/20260912T110958Z`, its source, permissions or
-  pointer. The fallback has its original 0–0.999 controls and 66-second tour; the new
-  candidate has the newly approved 0–0.999 controls and 54-second tour.
-- Build only into `build/relativity-candidate`. Read MATH.md and DEMO_FREEZE.md.
-- Reserve **16:00–16:30 BST** for regression/rehearsal; present at 16:30. No features
-  or dependency changes during that window.
+- Working development app: http://127.0.0.1:5173; `./scripts/start-dev.sh` reuses it.
+- New production fly-through candidate: http://127.0.0.1:4175. Build with
+  `./scripts/npm.sh run build -- --outDir build/relativity-flythrough-candidate`.
+  Serve with `./scripts/npm.sh run preview -- --port 4175 --outDir build/relativity-flythrough-candidate`.
+- Previous verified candidate remains at http://127.0.0.1:4174, without rebuilding.
+- Original frozen fallback: `./run_demo.sh --known-good`, normally port 4173;
+  no installation, compilation or downloads. Never alter
+  `releases/20260912T110958Z`, its source, assets, permissions or pointer.
+- Existing Modal bridge remains separate from the deterministic local scene.
+  No provider world or artwork starts automatically on page load.
 
-## Visible local demonstration
+## Demonstrate the motion
 
-The revised candidate prioritises immediate manual presets through 0.999c, a
-fixed-scale 100 m reference alongside the contracted silhouette, adjacent clocks
-with accumulated-time ticks, and a calculated constant-speed rate comparison.
-The optical baseline keeps camera/scene/position while disabling only the optical
-transform. Manual controls interrupt the 54-second tour. All measurement and
-clock values use current beta. PHYSICS.md explains the explicit visual limitations.
-The visual gate checks geometry ratios and screenshots, not only text values.
+1. Select a low speed with the slider and press Run for a slow approach.
+2. Press **BURST TO 0.999c** or Space. Gates and station structures approach and
+   pass during acceleration/coast, then recover towards the low-speed appearance
+   during braking. If already fast, the programme first brakes; clocks never reset.
+3. Use **Compare without optical effects** to view the same moving course,
+   camera and journey with only the photon transform bypassed.
+4. Select 0.999c for the persistent comparison: the fixed 100 m reference sits
+   beside the 4.47 m lab-frame ship, with adjacent accumulated clocks.
+5. P pauses, manual speed input cancels the burst, R resets. Camera and optical
+   comparison preserve the burst. The existing 54-second tour is still available.
 
-## Unpaid media repair
+The scene contains fixed polygon gates every 0.45 light-seconds, a side truss,
+rails and tilted box frames. Motion uses the existing integrated observer position.
+The verified photon kernel transforms each sampled geometry point once. The
+course is finite, ending at 72 light-seconds. The separate 100 m ruler uses a
+simultaneous lab-frame measurement. Thin wires, edge sampling, illustrative
+acceleration, opacity and false colour are documented in PHYSICS.md.
+
+The actual 10–15-second app recording and measured motion/performance checks are
+under `build/evidence/flythrough/`. A static high-speed screenshot alone is not
+acceptance. Read the final receipt for exact executed checks and retained video.
+
+## Unpaid Reactor addendum
+
+The existing sponsor worker owns the latest bounded integration addendum. The
+single **Generate & enter Reactor world** action retains the installed Directing
+lifecycle, one-attempt media factory, explicit user start and cleanup boundaries.
+It may reattach a compatible cached world; it does not regenerate on each burst.
+Cruise/Burst/Brake directions consume the shared snapshot and are coalesced.
+The compact panel reports connecting, building and stream startup separately,
+requires advancing decoded frames for Live and retains manual autoplay recovery.
+Modal provenance requires a successful protected token response, not health alone;
+Runware opening-artwork attribution requires actually supplying a cached image.
+These source changes do not establish real generated-video playback. No new
+world or generation allowance is authorised by the addendum.
+
+## Preserved media safeguards
 
 The actual component requires nonzero dimensions and advancing decoded frames;
 a poster, connected session or playing event is insufficient. Playback is muted.
@@ -88,10 +113,17 @@ belong in the final receipt described in QA.md.
 
 | Service | Status | Evidence and boundary |
 | --- | --- | --- |
-| Modal | **LIVE** | Retained CPU bridge and local proxy return health 200; proxy reports Modal hosting. Prior protected token exchange worked. No redeployment this pass. |
+| Modal | **LIVE** | Existing CPU bridge redeployed under the explicit addendum with saved Runware key and allowance 0. Protected Modal → Reactor token exchange returned HTTP 200 with valid short-lived token; no session allocation. Evidence: build/evidence/reactor-modal-auth-preflight.json. |
 | Reactor control/auth | **LIVE — previously verified** | Two earlier worlds entered travel. Final β=0 direction was accepted and timeline EXECUTED; direct end returned completed. Historical evidence, not a final-revision live retest. |
 | Reactor video | **UNVERIFIED** | Neither earlier travel produced playable video. Media-origin and playback repairs have unpaid validation only. |
-| Runware | **BLOCKED** | User-supplied key saved locally in ignored server settings, untested. Retained Modal service still has no Runware key; generation allowance remains zero. Status ready:false / attempted:false; no generated/cached image. Adapter/cache code is not successful sponsor usage. |
+| Runware | **BLOCKED — generation approval absent** | Saved key is now wired to the existing Modal secret. Protected status: configured:true, ready:false, can_generate:false, attempted:false. The key has not been validated by generation and no image exists. No new key is needed. |
+
+The first incomplete stage for the current live test is the deliberate entry
+action: it has not been executed because previous paid allowances are exhausted.
+Authentication is now verified through Modal; current world creation, travel,
+media arrival and advancing frames remain untested. Historical tests observed no
+advancing video and blocked signalling origins; old track telemetry cannot prove
+whether a video track arrived. The new diagnostics distinguish those failures.
 
 An earlier preliminary allocation failed readiness before world creation; count it
 as potentially billable in addition to the two travels. First-travel SDK cleanup
@@ -133,8 +165,8 @@ Expected offline Runware request errors remain visible in evidence. Do not merge
 historical counts into a claim about final HEAD.
 
 Credentials remain server-side in ignored `.env.server` (0600) and the retained
-Modal secret. The new Runware key is saved only locally, not in the deployed secret,
-and has not been validated or used. Primary credentials worked earlier; previous credentials and FAL
+Modal secret. The saved Runware key is now also in the existing deployed secret, with generation
+allowance zero; it has not been validated by generation or used for an image. Primary credentials worked earlier; previous credentials and FAL
 remain unused. No browser/VITE secrets. Staged source and rebuilt candidate are
 scanned without printing secrets; snapshot runtime/source hashes are checked.
 Headless Chrome uses an isolated profile. No desktop Computer Use or macOS changes.

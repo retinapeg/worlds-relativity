@@ -8,6 +8,8 @@ import { endRemoteTravel, finishWithin, sendRemoteInstruction } from './endTrave
 import { useRunwareArtwork } from '../runware/artwork';
 import { watchWorldVideo } from './media';
 
+const WORLD_CACHE = 'relativity.reactor.directing.orbital-gate.v1';
+
 function safeError(error: unknown) {
   const text = error instanceof Error ? error.message + (error.cause instanceof Error ? ` Cause: ${error.cause.message}` : '') : 'The provider could not complete this request.';
   return text.replace(/(?:Bearer\s+)?[\w=-]{32,}(?:\.[\w=-]+)*/g, '[redacted]').slice(0, 300);
@@ -25,6 +27,7 @@ function World({ snapshot }: { snapshot: Snapshot }) {
   const pendingTravel = useRef<Promise<TravelSession> | null>(null);
   const credentialsRef = useRef<TravelCredentialsMessage | null>(null);
   const queue = useRef<LatestInstruction | null>(null);
+  const lastFlightAction = useRef<string | null>(null);
   const generation = useRef(0), busy = useRef(false);
   const closing = useRef(false);
   const token = useRef<ReturnType<typeof createTokenResolver> | null>(null);
@@ -37,11 +40,16 @@ function World({ snapshot }: { snapshot: Snapshot }) {
   const [playBlocked, setPlayBlocked] = useState(false);
   const [sent, setSent] = useState<{ key: string; text: string } | null>(null);
   const [accepted, setAccepted] = useState<{ key: string; text: string } | null>(null);
+  const instructionStarted = useRef(0);
+  const [ackDelay, setAckDelay] = useState<number | null>(null);
   const [instructionState, setInstructionState] = useState('Waiting for a live world');
   const [stopConfirmed, setStopConfirmed] = useState(false);
   const [blockedOrigins, setBlockedOrigins] = useState<string[]>([]);
   const [videoEpoch, setVideoEpoch] = useState(0);
   const [needsReload, setNeedsReload] = useState(false);
+  const [backend, setBackend] = useState<string | null>(null);
+  const [openingArtwork, setOpeningArtwork] = useState(false);
+  const [mediaEvidence, setMediaEvidence] = useState('No stream requested.');
 
   const stop = async (reason = 'stopped') => {
     if (closing.current) return;
@@ -59,6 +67,11 @@ function World({ snapshot }: { snapshot: Snapshot }) {
     if (interruptedSetup || pending) setNeedsReload(true);
     // React clears DOM refs before passive unmount cleanup; retain the element we bound.
     const attached = mediaElement.current ?? video.current;
+    if (attached && (active || pending)) {
+      const stream = attached.srcObject;
+      const tracks = stream instanceof MediaStream ? stream.getVideoTracks() : [];
+      setMediaEvidence(`Video ${attached.videoWidth}×${attached.videoHeight}; ready state ${attached.readyState}; ${tracks.filter(track => track.readyState === 'live').length} live video tracks; ${attached.getVideoPlaybackQuality?.().totalVideoFrames ?? 0} decoded frames.`);
+    }
     mediaElement.current = null;
     const detach = () => {
       if (!attached) return;
@@ -113,21 +126,33 @@ function World({ snapshot }: { snapshot: Snapshot }) {
     const id = ++generation.current;
     const current = () => generation.current === id;
     setMessage(''); setSent(null); setAccepted(null); setPlaying(false); setPlayBlocked(false); setStep('authorising'); setStopConfirmed(false); setVideoEpoch(old => old + 1);
-    setInstructionState('Waiting for a live world'); setRemaining(180);
+    setInstructionState('Waiting for a live world'); setRemaining(180); setAckDelay(null);
+    setMediaEvidence('Waiting for stream attachment.'); setOpeningArtwork(false);
     token.current = createTokenResolver();
     timeout.current = setTimeout(() => { setMessage('World setup exceeded four minutes. Restart explicitly when ready.'); void stopRef.current('expired'); }, 240000);
     try {
       await token.current.resolve();
       if (!current()) return;
+      setBackend(token.current.hosting());
       setStep('connecting');
       // SDK attempt options count readiness/SDP polls, not newly created sessions.
       // The JWT's max_sessions=1 and one explicit connect bound allocation.
       await apiRef.current.connect(token.current.resolve);
       if (!current()) { await finishWithin(apiRef.current.disconnect()).catch(() => {}); return; }
       setStep('creating world');
-      await apiRef.current.createWorld({ prompt: WORLD_PROMPT, resolution: '720p', layout: 'Stable', narrative: 'Calm',
-        ...(artwork.image ? { firstFrameImage: artwork.image } : {}) });
+      let saved: { id: string; mode: number; artwork: boolean } | null = null;
+      try { saved = JSON.parse(localStorage.getItem(WORLD_CACHE) ?? 'null'); } catch { /* Storage is optional. */ }
+      const reusable = saved?.mode === 2 && typeof saved.id === 'string' && saved.id.trim().length > 0;
+      const world = reusable ?
+        await apiRef.current.attachWorld(saved!.id) :
+        await apiRef.current.createWorld({ prompt: WORLD_PROMPT, resolution: '720p', layout: 'Stable', narrative: 'Calm',
+          ...(artwork.image ? { firstFrameImage: artwork.image } : {}) });
       if (!current()) return;
+      const usedArtwork = reusable ? saved!.artwork === true : !!artwork.image;
+      setOpeningArtwork(usedArtwork);
+      if (world.encrypted_world_id) {
+        try { localStorage.setItem(WORLD_CACHE, JSON.stringify({ id: world.encrypted_world_id, mode: 2, artwork: usedArtwork })); } catch { /* Reuse is optional. */ }
+      }
       setStep('starting travel');
       const credentials = await apiRef.current.model.requestCredentials();
       if (!current()) return;
@@ -137,7 +162,12 @@ function World({ snapshot }: { snapshot: Snapshot }) {
       clearTimeout(timeout.current);
       timeout.current = setTimeout(() => { void stopRef.current('expired'); }, 180000);
       mediaTimeout.current = setTimeout(() => {
-        setMessage('Media did not start within 60 seconds. The world is being stopped.');
+        const element = mediaElement.current;
+        const stream = element?.srcObject;
+        const tracks = stream instanceof MediaStream ? stream.getVideoTracks() : [];
+        setMessage(tracks.some(track => track.readyState === 'live') ?
+          'Media did not start within 60 seconds: a video track arrived but no advancing playback was confirmed. The world is being stopped.' :
+          'Media did not start within 60 seconds: no live video track arrived. The world is being stopped.');
         void stopRef.current('failed');
       }, 60000);
       mediaElement.current = video.current;
@@ -177,9 +207,10 @@ function World({ snapshot }: { snapshot: Snapshot }) {
       setInstructionState('Sending direction…');
       await sendRemoteInstruction(credentials, travel.encrypted_travel_id, text);
     }, (key, text) => {
+      setAckDelay((Date.now() - instructionStarted.current) / 1000);
       setAccepted({ key, text }); setInstructionState('Direction accepted · awaiting timeline');
     }, error => { setInstructionState('Direction failed'); setMessage(safeError(error)); },
-    (key, text) => setSent({ key, text }));
+    (key, text) => { instructionStarted.current = Date.now(); setSent({ key, text }); });
     queue.current.push(worldDirection(latest.current));
   }, [api.phase, api.travelState?.status, api.travelState?.encrypted_travel_id]);
   useEffect(() => {
@@ -187,12 +218,16 @@ function World({ snapshot }: { snapshot: Snapshot }) {
       void stopRef.current(api.travelState!.status);
   }, [api.travelState?.status]);
 
-  // Local physics never waits. Send a settled artistic regime after 450 ms.
+  // Flight events are immediate. Debounce qualitative view/optical changes;
+  // continuously changing beta labels must not suppress a short braking phase.
   const direction = worldDirection(snapshot);
   useEffect(() => {
-    const timer = setTimeout(() => queue.current?.push(direction), 450);
+    const actionChanged = lastFlightAction.current !== direction.action;
+    lastFlightAction.current = direction.action;
+    if (actionChanged) { queue.current?.push(direction); return; }
+    const timer = setTimeout(() => queue.current?.push(worldDirection(latest.current)), 450);
     return () => clearTimeout(timer);
-  }, [direction.key, direction.text]);
+  }, [direction.action, direction.text]);
   useEffect(() => {
     const timer = setInterval(() => {
       if (!session.current) return;
@@ -203,10 +238,13 @@ function World({ snapshot }: { snapshot: Snapshot }) {
   }, []);
   const scheduled = accepted && api.travelState?.user_instructions.find(item => item.instruction === accepted.text);
   const active = !['idle', 'stopped', 'failed', 'expired', 'completed'].includes(step);
-  const reactorLabel = playing ? 'Reactor: live' : active ? step === 'stopping' ? 'Reactor: stopping' : 'Reactor: connecting' :
+  const building = ['creating', 'building'].includes(api.worldState?.phase ?? '') || step === 'creating world';
+  const streaming = !!credentialsRef.current || api.travelState?.status === 'running';
+  const reactorLabel = playing ? 'Reactor: Live' : active ? step === 'stopping' ? 'Reactor: stopping' :
+    building ? 'Reactor: Building world' : streaming ? 'Reactor: Starting stream' : 'Reactor: Connecting' :
     step === 'failed' ? 'Reactor: error' : 'Reactor: stopped';
   return <section className="world-panel" aria-label="Reactor generated world">
-    <div className="world-heading"><div><span className="eyebrow">02 / REACTOR GENERATED WORLD</span><h2>The journey, imagined.</h2></div>
+    <div className="world-heading"><div><span className="eyebrow">{playing ? 'REACTOR · LIVE VIDEO' : 'REACTOR · VIDEO UNVERIFIED'}</span><h2>The journey, imagined.</h2></div>
       <span className={`world-status ${playing ? 'live' : ''}`} data-testid="world-status"
         data-state={playing ? 'VIDEO PLAYING' : step.toUpperCase()}
         title={playing ? 'Receiving advancing decoded video frames' : 'Video is not playing'}>{reactorLabel}</span></div>
@@ -223,18 +261,21 @@ function World({ snapshot }: { snapshot: Snapshot }) {
     <div className="artwork-status" role="status"><span>{artwork.message}</span>
       {artwork.canGenerate && <button disabled={active || artwork.busy} onClick={() => { void artwork.generate(); }}>
         {artwork.busy ? 'Generating…' : 'Generate starting frame'}</button>}</div>
-    <div className="world-controls"><button className="start-world" onClick={() => { if (needsReload) window.location.reload(); else void start(); }} disabled={active}>✦ {needsReload ? 'Reload page' : step === 'idle' ? 'Start world' : 'Restart world'}</button>
+    <div className="world-controls"><button className="start-world" onClick={() => { if (needsReload) window.location.reload(); else void start(); }} disabled={active}>✦ {needsReload ? 'Reload page' : 'Generate & enter Reactor world'}</button>
       <button onClick={() => { void stop(); }} disabled={!active}>Stop world</button><span>ONE WORLD · 3 MIN MAX</span></div>
     <div className="direction-status" role="status">
-      <div data-testid="world-local-direction">Local: {direction.key}</div>
+      <div data-testid="world-local-direction">Local: {direction.key} · {direction.action}</div>
       <div data-testid="world-accepted-direction">Last accepted: {accepted?.key ?? 'none'}</div>
+      {ackDelay !== null && <small>Last acknowledgement took {ackDelay.toFixed(1)}s. Visual response may arrive later.</small>}
       <small>{!active ? 'World stopped · local controls remain independent.' : instructionState === 'Direction failed' ? instructionState :
         accepted?.text === direction.text ? 'Current artistic direction acknowledged · imagery may differ.' :
         accepted ? 'Local view changed · awaiting latest direction.' : instructionState}</small>
     </div>
     {message && <p className="provider-error" role="alert">{message} Local science remains available.</p>}
+    <p className="ai-label" data-testid="world-provenance">World: Reactor / HappyOyster · {openingArtwork ? 'Opening artwork: Runware · ' : ''}{backend === 'modal' ? 'Backend: Modal · ' : ''}Physics: local deterministic engine</p>
     <details className="world-diagnostics"><summary>Connection details</summary><p>Reactor: {api.phase} · Last connected world snapshot: {api.worldState?.phase ?? 'none'} · Travel: {stopConfirmed ? 'completed (end confirmed)' : api.travelState?.status ?? 'none'}</p>
       <p>{stopConfirmed ? 'Provider confirmed travel ended.' : 'No travel-end confirmation for this connection.'}</p>
+      <p>{mediaEvidence}</p>
       {blockedOrigins.length > 0 && <p>Blocked network origins: {blockedOrigins.join(', ')}</p>}
       <p>Instruction acceptance describes provider scheduling, not exact imagery or instantaneous synchronisation. Display colour is illustrative.</p>
       <p data-testid="world-sent-direction">Last sent: {sent?.key ?? 'none'}</p>

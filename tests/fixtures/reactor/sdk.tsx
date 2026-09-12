@@ -10,7 +10,7 @@ let state: { phase: string; worldState: { phase: string } | null; travelState: T
   { phase: 'idle', worldState: null, travelState: null };
 const listeners = new Set<() => void>();
 const update = (patch: Partial<typeof state>) => { state = { ...state, ...patch }; listeners.forEach(callback => callback()); };
-const calls = { connect: 0, createWorld: 0, credentials: 0, startTravel: 0, disconnect: 0, end: 0, destroy: 0, play: 0 };
+const calls = { connect: 0, createWorld: 0, attachWorld: 0, credentials: 0, startTravel: 0, disconnect: 0, end: 0, destroy: 0, play: 0 };
 let scenario: Scenario = 'frames';
 let boundVideo: HTMLVideoElement | null = null;
 let originalPlay: (() => Promise<void>) | null = null;
@@ -76,7 +76,15 @@ const createWorld = async (_options: unknown) => {
   calls.createWorld++;
   if (scenario === 'create-failure') throw new Error('Fixture world setup failed');
   if (scenario === 'pending-create') await new Promise<void>(resolve => { setupResolve = resolve; });
-  update({ worldState: { phase: 'ready' } });
+  const world = { phase: 'ready', encrypted_world_id: 'fixture-world', mode: 2 };
+  update({ worldState: world });
+  return world;
+};
+const attachWorld = async (_id: string) => {
+  calls.attachWorld++;
+  const world = { phase: 'ready', encrypted_world_id: 'fixture-world', mode: 2 };
+  update({ worldState: world });
+  return world;
 };
 const disconnect = async () => {
   calls.disconnect++;
@@ -89,7 +97,7 @@ const model = { requestCredentials: async () => {
 } };
 export function useHappyOyster() {
   const snapshot = useSyncExternalStore(callback => { listeners.add(callback); return () => { listeners.delete(callback); }; }, () => state);
-  return { ...snapshot, connect, createWorld, disconnect, model };
+  return { ...snapshot, connect, createWorld, attachWorld, disconnect, model };
 }
 export function HappyOysterProvider({ children }: { children: ReactNode }) { return children; }
 export const AliRtcEngine = { getInstance: () => ({ destroy: async () => { calls.destroy++; cleanup(); } }) };

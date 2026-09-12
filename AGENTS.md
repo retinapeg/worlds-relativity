@@ -22,6 +22,31 @@ This approval does not authorize unspecified billable calls or publication; obta
 the spending scope before live generation. Preserve the existing frozen snapshot.
 All mathematical, security, review, sandbox and multi-agent safeguards still apply.
 
+### Current bounded fly-through authorisation — 15:45 BST
+
+The latest user brief explicitly supersedes the earlier feature freeze for this
+change only: stationary lab-space polygon gates, gridded truss and tilted objects;
+observer translation from the existing position accumulator; the existing photon
+kernel applied once to sampled geometry; and a finite rapidity burst to 0.999c.
+Use light-seconds, preserve the separate 100 m measurement, numerical engine,
+commit 2f3626007fa3b01b0a839002e5ebcdf382930fe9 and immutable frozen release.
+The burst adds burstPhase/burstTime to the shared snapshot; it does not add a
+competing time or position source. Baseline comparison preserves the same flight.
+
+This pass's actual ownership supersedes the older roster below:
+- Coordinator: task 01a09519-d3e4-7c32-adaf-3ff727741b6d; App.tsx, style.css,
+  shared integration, documentation and all Git operations.
+- Reused physics_audit worker: renderer/shaders, sceneSources/course.ts and
+  tests/course.test.ts only. Writes released after focused verification.
+- Reused sponsor_diagnosis worker: controls/simulation.ts, controls/desktop.ts
+  and their focused tests only. Writes released after focused verification.
+- Reused task 01a09533-734f-7781-871e-fb1a4854fbf0: browser scripts, motion
+  recording and final evidence only. No production components or Git operations.
+No additional workers, provider calls or generation allowances were required.
+Target integrated candidate by 16:10, regression/recording/handoff by 16:20,
+presentation 16:30. Once the moving course works, stop feature work. Build the new
+candidate in build/relativity-flythrough-candidate; retain the previous candidate.
+
 ## Approved MVP
 - A small bundled star-direction catalogue.
 - A fixed boost axis and a bounded rapidity control.

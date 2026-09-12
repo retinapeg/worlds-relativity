@@ -1,6 +1,23 @@
 # Worlds — verification record
 
-## Final source gate
+## Current fly-through gate
+
+The latest bounded implementation has its own receipt at
+`build/evidence/flythrough/final-verification.json`. Do not overwrite or combine
+it with the prior 2f362600 receipt below. The current source must be clean and
+match the recorded SHA. Build only into `build/relativity-flythrough-candidate`
+and test production preview 4175, preserving prior preview 4174.
+
+The gate includes all numerical/backend/native/WASM and lifecycle checks below,
+plus `scripts/flythrough-smoke.mjs`: actual geometry motion at constant beta,
+burst from rest and high speed, phase/clock/history continuity, manual takeover,
+pause/reset, same-flight optical comparison, clipping safety and provider-blocked
+offline operation. It measures actual browser frame intervals and records 10–15
+seconds of the running application. Inspect the retained video and frames; a
+changing HUD alone is insufficient. The encoder is already installed and is
+referenced via a project-local cache without a download or global change.
+
+## Previous candidate source gate — preserved 2f362600 reference
 
 The authoritative final-pass receipt is `build/evidence/final-verification.json`.
 It records the exact clean source revision, command outcomes, numerical counts,
