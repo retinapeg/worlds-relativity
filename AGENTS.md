@@ -10,11 +10,13 @@ no retries, purchases, new agents, provider changes or physics rewrites are allo
 
 The new Runware attempt returned HTTP 400 `insufficientCredits`; it produced no
 asset or reported cost. Both its durable marker and the earlier marker are
-preserved, and generation is disabled. No Runware allowance remains. Reactor
-verification must prove actual visible advancing frames and successful cleanup;
-until then retain READY / UNVERIFIED. Record its outcome in HANDOFF.md.
+preserved, and generation is disabled. The one Reactor attempt authenticated
+but failed model-session readiness after 20 polls; no world, travel or video
+started. Local cleanup completed, but no remote travel-end confirmation exists.
+Both provider allowances are now consumed. No retry is authorised. Reactor
+remains READY / UNVERIFIED; HANDOFF.md records the evidence and next steps.
 Keep the verified passage candidate on 4177 and all earlier snapshots intact.
-Any sponsor frontend changes use a separate candidate on 4178.
+The sponsor candidate is on 4178; the final wording-only candidate is on 4179.
 
 ## Current physics / visual correction — 12 September 2026
 

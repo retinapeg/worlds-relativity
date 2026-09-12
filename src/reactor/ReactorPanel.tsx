@@ -298,7 +298,7 @@ function World({ snapshot }: { snapshot: Snapshot }) {
         accepted?.text === direction.text ? 'Current artistic direction acknowledged · imagery may differ.' :
         accepted ? 'Local view changed · awaiting latest direction.' : instructionState}</small>
     </div>
-    {message && <p className="provider-error" role="alert">{message} Local science remains available.</p>}
+    {message && <p className="provider-error" role="alert">{message.includes('not ready after') ? 'Reactor could not get a ready model session.' : message} Local science remains available.</p>}
     <div className="sponsor-provenance" data-testid="world-provenance">
       <span>PHYSICS — Local deterministic SR engine · ● ACTIVE</span>
       <span>AI WORLD — Reactor / HappyOyster · {sessionVerified ? '● ACTIVE · last session verified' : '○ READY / UNVERIFIED'}</span>
@@ -306,6 +306,7 @@ function World({ snapshot }: { snapshot: Snapshot }) {
       <span>BACKEND — Modal · {backend === 'modal' || (artwork.image || artwork.status?.attempted) && artwork.status?.hosting === 'modal' ? '● ACTIVE' : '○ READY / UNVERIFIED'}</span>
     </div>
     <details className="world-diagnostics"><summary>Connection details</summary><p>Reactor: {api.phase} · Last connected world snapshot: {api.worldState?.phase ?? 'none'} · Travel: {stopConfirmed ? 'completed (end confirmed)' : api.travelState?.status ?? 'none'}</p>
+      {message && <p>Last connection error: {message}</p>}
       <p>{stopConfirmed ? 'Provider confirmed travel ended.' : 'No travel-end confirmation for this connection.'}</p>
       <p>{mediaEvidence}</p>
       <p>{sessionVerified ? 'Last session: visible playback and remote/local cleanup verified. Current playback is shown separately above.' : 'Playback and cleanup have not both been verified for this session.'}</p>

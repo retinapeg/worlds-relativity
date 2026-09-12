@@ -1,5 +1,45 @@
 # Worlds — controlled final handoff
 
+## Current sponsor outcome — 12 September 2026, 17:20 BST
+
+Use http://127.0.0.1:4179/ for the final candidate with clearer failure messages
+(`build/relativity-stack-candidate`). The verified passage candidate on 4177,
+sponsor verification build on 4178, earlier 4176 presentation and immutable
+fallback remain intact. Physics, observer translation, photon shaders and the
+offline fallback were not changed by the sponsor pass.
+
+| Component | Verified status | Evidence / blocker |
+| --- | --- | --- |
+| Physics | ACTIVE | Local deterministic SR and visible finite-course passage. |
+| Reactor / HappyOyster | READY / UNVERIFIED | One fresh attempt authenticated through Modal (HTTP 200), then the model session failed readiness after 20 polls. No world, travel or media started; zero video frames. |
+| Runware | BLOCKED | One fresh still request through Modal returned HTTP 400 `insufficientCredits`. No image or reported cost was returned. |
+| Modal | ACTIVE | Existing protected deployment handled both actual provider paths. |
+
+Both fresh allowances are consumed. No retry, purchase or top-up was performed.
+Runware generation is disabled, and both durable attempt records are preserved.
+Runware needs account credit and a newly approved single request. Reactor needs
+provider session readiness and a newly approved live attempt. No local optical
+change can establish either provider result. Keys remain server-side.
+
+Reactor local cleanup left no attached stream or tracks. No travel was created,
+so there is no remote travel-end acknowledgement; full playback/cleanup success
+is not claimed. ACTIVE verification requires actual visible advancing frames
+and confirmed remote/local cleanup, separate from current playback state.
+
+At source `0ec5e7783f157ae5a3633245110163aa90db52ea`, production build/typecheck,
+14 backend tests, 20 focused Reactor tests and 19 normal + 19 offline browser
+checks passed. The full frontend suite passed 58/59 twice: the fixed-course
+construction test exceeded its unchanged five-second timeout on both runs.
+No numerical assertion failure was reported, and no test or timeout was changed.
+Do not describe this suite as passing. The final candidate changes only provider
+wording/documentation and gets a separate build and status/screenshot check.
+
+Provider receipts: `build/evidence/runware-second-approved-generation.json` and
+`build/evidence/reactor-live-approved-attempt/result.json`. Final local evidence:
+`build/evidence/sponsor-completion/`. Earlier passage acceptance and its exact
+source/asset hashes remain in `build/evidence/course-passage/` (checkpoint c664eaf).
+Do not combine checks across revisions or treat synthetic tests as live video.
+
 ## Current physics / visual correction — 12 September 2026
 
 The user's latest explicit correction authorises only a fixed asymmetric finite

@@ -27,7 +27,8 @@ export function useRunwareArtwork() {
       setMessage('Runware artwork: cached real output.');
     } else setMessage(!data.configured ? 'Runware artwork: BLOCKED — server key missing.' :
       data.can_generate ? 'Runware artwork: ready — one image allowed.' :
-      data.attempted ? `Runware artwork: BLOCKED — ${data.failure ? `HTTP ${data.failure.http_status}. ${data.failure.errors[0]?.message ?? data.failure.errors[0]?.code ?? 'Request rejected.'}` : 'allowance used; check generation status.'}` : 'Runware artwork: BLOCKED — generation approval needed.');
+      data.failure?.errors.some(error => error.code === 'insufficientCredits') ? 'Artwork needs Runware credits. Your local flight is ready.' :
+      data.attempted ? 'Artwork unavailable. The approved request has been used.' : 'Artwork awaits generation approval.');
   };
   useEffect(() => {
     mounted.current = true;
