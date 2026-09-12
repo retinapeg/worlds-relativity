@@ -33,15 +33,24 @@ Provider keys never go in `VITE_*`, browser source, Git or logs.
 ## Use the screen
 
 - **Run/Pause/Reset** affect only local physics. Manual speed changes join idealised
-  constant-speed segments; accumulated proper time and position are preserved.
-- Set β from 0 to 0.99, or use 0, 0.6, 0.8, 0.95, 0.99 presets. The lab ruler measures a 100 m
-  moving craft at simultaneous lab times. It is a coordinate measurement, not a photo.
+  constant-speed segments; accumulated proper time and position are preserved. Velocity changes
+  are illustrative, not a propulsion or realistic acceleration programme. Adjacent
+  clocks and tick indicators use actual accumulated times. The 60-lab-second
+  comparison is calculated at the current constant speed, not elapsed journey time.
+- Set β from 0 to 0.999, or use REST, 0.6, 0.95, 0.99 and 0.999 presets.
+  The prominent 99.9% action immediately selects the strong comparison. The lab ruler measures a 100 m
+  moving craft at simultaneous lab times. Its side-on ghost and ruler stay fixed;
+  only longitudinal moving-ship geometry contracts. At 0.999c, 100 m becomes
+  4.47 m, 95.53% shorter. This is a coordinate measurement, not a photo.
 - Doppler is observed/emitted frequency. The hypothetical 550 nm line shows UV/IR
   when outside 380–750 nm. All display colour and beacon opacity are illustrative.
 - The Earth-frame Minkowski diagram uses equal x and ct scales, with c=1,
   seconds and light-seconds. Returning to rest never erases the journey.
 - Drag the local sky or choose Forward/Side/Rear; camera direction does not change
-  the fixed +X boost. The optional 66-second tour uses prescribed rapidity ramps.
+  the fixed +X boost. The optical baseline keeps the same camera, scene and positions
+  while disabling only the optical boost, without resetting journey clocks.
+  The optional 54-second tour uses prescribed 0.8-second rapidity ramps and ends
+  paused at 0.999c. Manual speed, view or baseline controls interrupt the tour.
 - **Start world** creates one stable cockpit/starfield world. A settled speed change
   sends a deterministic artistic direction; one request may be in flight and only
   the latest pending direction is retained. **Stop world** ends travel and disconnects.
@@ -125,16 +134,21 @@ approval, duration/spending bounds and uncertainty are specified in HANDOFF.md.
 
 ## 75-second presentation sequence
 
-1. **0–10 s:** Reset. Explain that the left view and all numbers use local SR;
-   the generated-world panel is a separately labelled artistic illustration.
-2. **10–25 s:** Select 0.6c. Show γ=1.25, an 80 m simultaneous lab length,
-   forward frequency ×2 / 275 nm UV and backward ×0.5 / 1100 nm IR.
-3. **25–40 s:** Press Run. Point out the traveller clock accumulating at 80% of
-   the lab rate and the sloping traveller worldline beside Earth's vertical line.
-4. **40–55 s:** Select 0.99c. Show γ≈7.089, length≈14.11 m and stronger forward
-   aberration. Look Side/Rear while explaining that the boost remains along +X.
-5. **55–65 s:** Return to rest and Pause. The accumulated clock difference remains;
-   past time is never recomputed when speed changes.
-6. **65–75 s:** Show the AI limitation label and honest connection status. Until
-   video is verified under a new allowance, present it as an integration in progress.
-   Reset to leave a clean paused screen.
+1. **0–10 s:** Reset. Point to the fixed 100 m ghost, full moving ship and equal
+   clocks. Explain that measurements and the starfield are computed locally.
+2. **10–20 s:** Select 0.6c: show 80 m, γ=1.25 and forward frequency ×2 / 275 nm UV.
+   The ghost and ruler keep their scale; only the measured longitudinal length changes.
+3. **20–35 s:** Select **Experience 99.9% of light speed**: show **100 m → 4.47 m**
+   and **95.53% shorter**. Identify this as a simultaneous lab-frame measurement.
+4. **35–50 s:** The experience action starts the clocks. Compare their ticks and the instantaneous **22.37 lab
+   seconds per ship second**. The separate **60 lab seconds → 2.68 ship seconds**
+   card is a constant-speed calculation; journey totals retain their actual history.
+5. **50–65 s:** Show Side/Rear, then compare the optical baseline with transformed
+   optics. The camera/scene stays the same and the clocks are not reset. State that
+   false colour is educational and the generated panel is an artistic illustration.
+6. **65–75 s:** Return to rest and Pause; the accumulated clock difference remains.
+   Show the honest Reactor/Runware/Modal status without starting an unapproved
+   session. Reset to leave a clean paused screen.
+
+For an automatic local-only alternative, run the existing revised **54-second**
+tour. It starts no provider world and finishes paused at 0.999c for inspection.

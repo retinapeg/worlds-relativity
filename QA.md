@@ -5,9 +5,12 @@
 The authoritative final-pass receipt is `build/evidence/final-verification.json`.
 It records the exact clean source revision, command outcomes, numerical counts,
 browser evidence, timestamp, secret scan and frozen hash checks. Compare its
-`sourceRevision` with `git rev-parse HEAD`. Do not treat an absent, failed or
+`sourceRevision` with `git rev-parse HEAD` and require `git status --porcelain`
+to be empty. Do not treat an absent, failed or
 revision-mismatched receipt as a completed gate. The baseline checkpoint and
-sponsor history are in HANDOFF.md; earlier test counts are not final HEAD evidence.
+sponsor history are in HANDOFF.md. The completed c5669b7 0–0.99 gate is preserved
+in build/evidence/checkpoint-c5669b7; its 66-second tour and counts do not establish
+the subsequent 0–0.999 visual candidate's results.
 
 Canonical commands, executed after all integration writes stop and final review:
 
@@ -38,14 +41,18 @@ DEMO_URL=http://127.0.0.1:4174 QA_LABEL=qa-final-offline REQUIRE_CLEAN=1   BLOCK
 The existing preview serves the rebuilt candidate. The smoke checks rest; every
 intermediate/near-c preset; analytic Doppler; real elapsed clock rate; pause;
 preserved mixed-speed history; camera independence; keyboard throttle bounds;
-full reset; and the browser's actual 483 GPU comparisons. The offline pass executes
-the entire 66-second tour and verifies a stopped rest state. Provider access is
+full reset; and the browser's actual 483 GPU comparisons. The revised presets are
+0, 0.6, 0.95, 0.99 and 0.999; actual geometry and clock ticks supplement text checks. The offline pass executes
+the entire 54-second tour and verifies its paused 0.999c end state. Geometry
+assertions compare the contracted silhouette with the fixed ghost/ruler, including
+the approximately 4.471% ratio at 0.999c and unchanged transverse dimensions.
+Manual tour interruption, baseline continuity and reset are also checked. Provider access is
 blocked in-browser, not by disabling the computer's network. All provider POSTs
 and external resources are blocked in both smoke runs.
 
 The normal smoke allows only local GET status requests and requires no unexpected
 console/request errors. The offline run separately records the deliberately
-blocked Runware status GET and its resource error. Both require no uncaught page
+blocked Runware status and Modal health GETs and their resource errors. Both require no uncaught page
 errors and no attempted provider session creation. Inspect the saved screenshots
 as well as numerical results; the gate is not just script creation.
 
@@ -55,10 +62,11 @@ silent stall, failed connection/world/factory setup, interrupted connection/worl
 setup, a late media factory, bounded disconnect, stale SDK callbacks and unmount.
 It exercises the actual component with test-only SDK aliases and real browser
 MediaStream/video elements. Tokens/directions/end replies are mocked. Counters
-assert no extra allocations; cleanup checks detach and ended tracks. Synthetic
+assert no extra allocations; cleanup checks detach and ended tracks. View/baseline changes exercise the same
+world without additional session creation; actual sends and acceptance are separate. Synthetic
 video is explicitly labelled and **does not establish live Reactor playback**.
 
-Expected artifact names:
+Expected final artifact names (preserve same-scale before/after visual evidence too):
 - `reactor-final-preflight.json` and its synthetic-frame screenshot.
 - `qa-final-production.json` and rest/near-c/rear screenshots.
 - `qa-final-offline.json` and the complete-tour screenshot.
@@ -71,7 +79,7 @@ source and runtime hashes identify it. At that freeze it passed 16 TypeScript
 tests, typecheck/build, 483 GPU comparisons (max relative-scaled error 2.6e-7),
 34,739 native sanitizer checks and 34,739 WASM checks. The earlier 0–0.999 tour
 finished at lab 66 s / traveller 30.162733 s. Those historical values belong to
-that different prescribed tour, not the current 0–0.99 candidate.
+that different prescribed tour, not the current 54-second visual candidate.
 
 The immutable fallback was browser-tested with all external connections blocked.
 This finalisation rechecks all 57 runtime/export and 49 source hashes; it does not

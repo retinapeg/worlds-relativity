@@ -24,10 +24,10 @@ export function useRunwareArtwork() {
       if (!valid) throw new Error('Starting frame has unsupported dimensions.');
       if (!mounted.current) return;
       setImage(blob);
-      setMessage('Runware starting frame · cached');
-    } else setMessage(!data.configured ? 'Runware artwork awaits a server key.' :
-      data.can_generate ? 'Runware ready · one image allowed.' :
-      data.attempted ? 'Image allowance used; check generation status.' : 'Runware artwork awaits generation approval.');
+      setMessage('Runware artwork: cached real output.');
+    } else setMessage(!data.configured ? 'Runware artwork: BLOCKED — server key missing.' :
+      data.can_generate ? 'Runware artwork: ready — one image allowed.' :
+      data.attempted ? 'Runware artwork: BLOCKED — allowance used; check generation status.' : 'Runware artwork: BLOCKED — generation approval needed.');
   };
   useEffect(() => {
     mounted.current = true;

@@ -4,7 +4,7 @@
  * Its passive Lorentz transform gives nu′/nu = gamma*(1 + beta*s.x).
  * MATH.md defines the same signs. UI bounds are narrower than the core domain.
  */
-export const MAX_BETA = 0.99;
+export const MAX_BETA = 0.999;
 export const MAX_ETA = Math.atanh(MAX_BETA);
 export type Vec3 = Readonly<{ x: number; y: number; z: number }>;
 export type Event1D = Readonly<{ t: number; x: number }>;

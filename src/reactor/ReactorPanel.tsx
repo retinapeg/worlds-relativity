@@ -36,6 +36,7 @@ function World({ snapshot }: { snapshot: Snapshot }) {
   const [playing, setPlaying] = useState(false), [remaining, setRemaining] = useState(180);
   const [playBlocked, setPlayBlocked] = useState(false);
   const [sent, setSent] = useState<{ key: string; text: string } | null>(null);
+  const [accepted, setAccepted] = useState<{ key: string; text: string } | null>(null);
   const [instructionState, setInstructionState] = useState('Waiting for a live world');
   const [stopConfirmed, setStopConfirmed] = useState(false);
   const [blockedOrigins, setBlockedOrigins] = useState<string[]>([]);
@@ -111,7 +112,7 @@ function World({ snapshot }: { snapshot: Snapshot }) {
     busy.current = true;
     const id = ++generation.current;
     const current = () => generation.current === id;
-    setMessage(''); setSent(null); setPlaying(false); setPlayBlocked(false); setStep('authorising'); setStopConfirmed(false); setVideoEpoch(old => old + 1);
+    setMessage(''); setSent(null); setAccepted(null); setPlaying(false); setPlayBlocked(false); setStep('authorising'); setStopConfirmed(false); setVideoEpoch(old => old + 1);
     setInstructionState('Waiting for a live world'); setRemaining(180);
     token.current = createTokenResolver();
     timeout.current = setTimeout(() => { setMessage('World setup exceeded four minutes. Restart explicitly when ready.'); void stopRef.current('expired'); }, 240000);
@@ -176,8 +177,9 @@ function World({ snapshot }: { snapshot: Snapshot }) {
       setInstructionState('Sending direction…');
       await sendRemoteInstruction(credentials, travel.encrypted_travel_id, text);
     }, (key, text) => {
-      setSent({ key, text }); setInstructionState(`Provider accepted β ${key} · awaiting timeline`);
-    }, error => { setInstructionState('Direction failed'); setMessage(safeError(error)); });
+      setAccepted({ key, text }); setInstructionState('Direction accepted · awaiting timeline');
+    }, error => { setInstructionState('Direction failed'); setMessage(safeError(error)); },
+    (key, text) => setSent({ key, text }));
     queue.current.push(worldDirection(latest.current));
   }, [api.phase, api.travelState?.status, api.travelState?.encrypted_travel_id]);
   useEffect(() => {
@@ -199,11 +201,15 @@ function World({ snapshot }: { snapshot: Snapshot }) {
     }, 1000);
     return () => clearInterval(timer);
   }, []);
-  const scheduled = sent && api.travelState?.user_instructions.find(item => item.instruction === sent.text);
+  const scheduled = accepted && api.travelState?.user_instructions.find(item => item.instruction === accepted.text);
   const active = !['idle', 'stopped', 'failed', 'expired', 'completed'].includes(step);
+  const reactorLabel = playing ? 'Reactor: live' : active ? step === 'stopping' ? 'Reactor: stopping' : 'Reactor: connecting' :
+    step === 'failed' ? 'Reactor: error' : 'Reactor: stopped';
   return <section className="world-panel" aria-label="Reactor generated world">
-    <div className="world-heading"><div><span className="eyebrow">02 / GENERATED WORLD</span><h2>The same journey. Imagined.</h2></div>
-      <span className={`world-status ${playing ? 'live' : ''}`} data-testid="world-status">{playing ? 'VIDEO PLAYING' : step.toUpperCase()}</span></div>
+    <div className="world-heading"><div><span className="eyebrow">02 / REACTOR GENERATED WORLD</span><h2>The journey, imagined.</h2></div>
+      <span className={`world-status ${playing ? 'live' : ''}`} data-testid="world-status"
+        data-state={playing ? 'VIDEO PLAYING' : step.toUpperCase()}
+        title={playing ? 'Receiving advancing decoded video frames' : 'Video is not playing'}>{reactorLabel}</span></div>
     <div className="world-screen">
       <video key={videoEpoch} ref={video} poster={artwork.url || undefined} autoPlay muted playsInline aria-label="Live HappyOyster world video" />
       {!playing && <div className="world-placeholder"><div className="window-symbol" aria-hidden="true">✦</div>
@@ -219,12 +225,20 @@ function World({ snapshot }: { snapshot: Snapshot }) {
         {artwork.busy ? 'Generating…' : 'Generate starting frame'}</button>}</div>
     <div className="world-controls"><button className="start-world" onClick={() => { if (needsReload) window.location.reload(); else void start(); }} disabled={active}>✦ {needsReload ? 'Reload page' : step === 'idle' ? 'Start world' : 'Restart world'}</button>
       <button onClick={() => { void stop(); }} disabled={!active}>Stop world</button><span>ONE WORLD · 3 MIN MAX</span></div>
-    <div className="direction-status" role="status">{scheduled ? `Provider timeline: ${scheduled.status ?? 'scheduled'} · β ${sent!.key}` : instructionState}</div>
+    <div className="direction-status" role="status">
+      <div data-testid="world-local-direction">Local: {direction.key}</div>
+      <div data-testid="world-accepted-direction">Last accepted: {accepted?.key ?? 'none'}</div>
+      <small>{!active ? 'World stopped · local controls remain independent.' : instructionState === 'Direction failed' ? instructionState :
+        accepted?.text === direction.text ? 'Current artistic direction acknowledged · imagery may differ.' :
+        accepted ? 'Local view changed · awaiting latest direction.' : instructionState}</small>
+    </div>
     {message && <p className="provider-error" role="alert">{message} Local science remains available.</p>}
     <details className="world-diagnostics"><summary>Connection details</summary><p>Reactor: {api.phase} · Last connected world snapshot: {api.worldState?.phase ?? 'none'} · Travel: {stopConfirmed ? 'completed (end confirmed)' : api.travelState?.status ?? 'none'}</p>
       <p>{stopConfirmed ? 'Provider confirmed travel ended.' : 'No travel-end confirmation for this connection.'}</p>
       {blockedOrigins.length > 0 && <p>Blocked network origins: {blockedOrigins.join(', ')}</p>}
       <p>Instruction acceptance describes provider scheduling, not exact imagery or instantaneous synchronisation. Display colour is illustrative.</p>
+      <p data-testid="world-sent-direction">Last sent: {sent?.key ?? 'none'}</p>
+      <p data-testid="world-timeline">Matching provider timeline: {scheduled?.status ?? 'no matching entry'}. Matched by instruction text; repeated directions may match an earlier entry. This does not report current local speed.</p>
       {sent && <p>{sent.text}</p>}</details>
   </section>;
 }

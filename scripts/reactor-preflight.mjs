@@ -29,8 +29,8 @@ const server = await createServer({ configFile:false, root:process.cwd(), public
 let browser;
 const videoState = page => page.evaluate(() => ({ ...window.__reactorFixture.getVideoState(),
   currentTime:document.querySelector('video')?.currentTime ?? 0 }));
-const playing = page => page.waitForFunction(() => document.querySelector('[data-testid="world-status"]')?.textContent === 'VIDEO PLAYING', null, { timeout:10000 });
-const stopped = (page, timeout = 15000) => page.waitForFunction(() => /^(STOPPED|FAILED|EXPIRED|COMPLETED)$/.test(document.querySelector('[data-testid="world-status"]')?.textContent ?? ''), null, { timeout });
+const playing = page => page.waitForFunction(() => document.querySelector('[data-testid="world-status"]')?.dataset.state === 'VIDEO PLAYING', null, { timeout:10000 });
+const stopped = (page, timeout = 15000) => page.waitForFunction(() => /^(STOPPED|FAILED|EXPIRED|COMPLETED)$/.test(document.querySelector('[data-testid="world-status"]')?.dataset.state ?? ''), null, { timeout });
 async function cleaned(page) {
   await page.waitForFunction(() => {
     const state = window.__reactorFixture.getVideoState();
@@ -84,7 +84,7 @@ try {
       await page.getByRole('button', { name:'✦ Start world', exact:true }).click();
       if (scenario === 'play-rejection') {
         await page.getByRole('button', { name:'Play video', exact:true }).waitFor();
-        assert.notEqual(await page.getByTestId('world-status').textContent(), 'VIDEO PLAYING');
+        assert.notEqual(await page.getByTestId('world-status').getAttribute('data-state'), 'VIDEO PLAYING');
         await page.evaluate(() => window.__reactorFixture.allowPlay());
         await page.getByRole('button', { name:'Play video', exact:true }).click();
       }
@@ -98,15 +98,24 @@ try {
       }
       if (scenario === 'frames') {
         await page.evaluate(() => window.__reactorFixture.setBeta(.6));
-        await page.getByText('Provider timeline: EXECUTED · β 0.600', { exact:true }).waitFor();
+        await page.getByText('Last accepted: β 0.600 · forward', { exact:true }).waitFor();
+        assert.match(await page.getByTestId('world-timeline').textContent(), /EXECUTED/);
         assert.ok(result.mocked.instructions.some(text => text.includes('moderate forward concentration')));
+        await page.evaluate(() => window.__reactorFixture.setView(Math.PI / 2));
+        await page.getByText('Last accepted: β 0.600 · side +Z', { exact:true }).waitFor();
+        await page.evaluate(() => window.__reactorFixture.setView(Math.PI));
+        await page.getByText('Last accepted: β 0.600 · rear', { exact:true }).waitFor();
+        await page.evaluate(() => window.__reactorFixture.setBaseline(true));
+        await page.getByText('Last accepted: β 0.600 · rear · baseline', { exact:true }).waitFor();
+        assert.ok(result.mocked.instructions.some(text => text.includes('unshifted optical baseline')));
+        result.viewAndBaselineDirectionsAccepted = true;
         await page.screenshot({ path:`${output}/${label}-synthetic-frames.png`, fullPage:true });
       }
       if (scenario === 'poster-only') {
         await page.waitForFunction(() => window.__reactorFixture.calls.startTravel === 1);
         await page.waitForTimeout(1000);
         const state = await videoState(page);
-        assert.equal(state.frames, 0); assert.notEqual(await page.getByTestId('world-status').textContent(), 'VIDEO PLAYING');
+        assert.equal(state.frames, 0); assert.notEqual(await page.getByTestId('world-status').getAttribute('data-state'), 'VIDEO PLAYING');
         result.posterWasNotVideo = true;
         await stopped(page, 65000); // Real media-arrival deadline, not a shortened fixture timeout.
         assert.match(await page.locator('.provider-error').innerText(), /Media did not start/);
@@ -136,7 +145,7 @@ try {
         const calls = await page.evaluate(() => ({ ...window.__reactorFixture.calls }));
         assert.equal(calls.credentials, 0); assert.equal(calls.startTravel, 0);
         assert.equal(calls.createWorld, scenario === 'pending-connect' ? 0 : 1);
-        assert.equal(await page.getByTestId('world-status').textContent(), 'STOPPED');
+        assert.equal(await page.getByTestId('world-status').getAttribute('data-state'), 'STOPPED');
         await page.getByRole('button', { name:'✦ Reload page', exact:true }).waitFor();
         result.lateSetupCouldNotStartTravel = true;
       }
@@ -147,7 +156,7 @@ try {
       result.cleanup = await cleaned(page);
       if (scenario === 'frames') {
         await page.evaluate(() => { window.__reactorFixture.emitLateStatus('running'); window.__reactorFixture.emitLateError(); });
-        assert.equal(await page.getByTestId('world-status').textContent(), 'STOPPED');
+        assert.equal(await page.getByTestId('world-status').getAttribute('data-state'), 'STOPPED');
       }
       result.calls = await page.evaluate(() => ({ ...window.__reactorFixture.calls }));
       assert.equal(result.mocked.token, 1); assert.equal(result.calls.connect, 1);

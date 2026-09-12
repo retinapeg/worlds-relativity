@@ -15,6 +15,14 @@ describe('special relativity in the lab frame, c = 1', () => {
     expect(r.recede).toBeCloseTo(0.5, 13);
     expect(gamma(0.8)).toBeCloseTo(5 / 3, 13);
   });
+  it('matches the approved high-speed measurement and clock comparisons', () => {
+    for (const [beta, metres] of [[0.95, 31.22498999199199], [0.99, 14.10673597966589], [0.999, 4.47101778122163]])
+      expect(100 * ratios(beta).length).toBeCloseTo(metres, 10);
+    const high = ratios(0.999);
+    expect(high.gamma).toBeCloseTo(22.36627204212937, 10);
+    expect(100 * (1 - high.length)).toBeCloseTo(95.52898221877837, 10);
+    expect(60 * high.properRate).toBeCloseTo(2.682610668732978, 10);
+  });
   it('recovers events with the inverse transform and preserves the interval', () => {
     for (const beta of [-0.999, -0.6, 0, 0.8, 0.999]) {
       for (const event of [{ t: 5, x: 3 }, { t: 3, x: 5 }, { t: 8, x: -8 }]) {

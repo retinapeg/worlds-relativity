@@ -98,6 +98,8 @@ export const fixture = {
   calls,
   setScenario: (value: Scenario) => { scenario = value; },
   setBeta: (_value: number) => {},
+  setView: (_yaw: number) => {},
+  setBaseline: (_value: boolean) => {},
   unmount: () => {},
   freeze,
   nativeError: () => boundVideo?.dispatchEvent(new Event('error')),

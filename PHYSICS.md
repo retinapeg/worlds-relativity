@@ -1,7 +1,8 @@
 # Current browser mathematics
 
 This supplements, and does not modify, the preserved MATH.md reference.
-The latest user brief adds clocks, a coordinate ruler and a 0–0.99 velocity UI.
+The latest user brief adds prominent clock/length comparisons, an optical baseline
+comparison and a validated 0–0.999 velocity UI. All use the current simulation state.
 
 ## Photon transformation
 
@@ -44,10 +45,22 @@ x′ = gamma * (x - beta*t)
 ```
 
 The 100 m rod is defined to move with the observer. Its length in S is measured
-between endpoints at equal S time. The ruler is an independent measurement
-diagram, without a claim about a camera image or the apparent shape of the stars.
+between endpoints at equal S time. The ruler is an independent, side-on, fixed-scale measurement
+diagram. Its 100 m ghost/reference stays fixed; only the moving silhouette
+contracts along +X, retaining transverse dimensions. Labels are outside that
+transform. There is no minimum width or auto-fit. This is not a camera image.
+At β=.999, γ≈22.366272 and L≈4.471018 m: 95.528982% shorter.
 
-Manual controls change immediately between constant-speed segments. Only the optional tour prescribes linear rapidity over three lab seconds, with no dynamics.
+Both journey clocks integrate actual accumulated times; their tick animations use
+those same times. The separate constant-speed comparison is calculated, not
+already elapsed journey time: at β=.999, 60 lab seconds correspond to about
+2.682611 ship seconds. The instantaneous rate is 1 ship second per 22.366272 lab
+seconds. Returning to rest never recomputes past proper time.
+
+Manual controls change immediately between constant-speed segments and interrupt
+the tour. These are labelled illustrative changes of velocity, not a dynamical
+acceleration model. Only the optional tour prescribes linear rapidity over
+0.8 lab seconds, with no dynamics.
 Over a ramp from eta0 to eta1 lasting dt:
 
 ```
@@ -57,7 +70,12 @@ deltaX = dt * (log(cosh(eta1)) - log(cosh(eta0))) / (eta1 - eta0)
 
 Near equal rapidities the constant midpoint limit avoids subtractive cancellation.
 The integrator splits steps at ramp and demo-cue boundaries and keeps historical
-clock totals, positions and segment endpoints. A visibility boundary resets the
+clock totals, positions and segment endpoints. The revised 54-second tour reaches
+0.6c after 1 second, 0.99c at 6 seconds and 0.999c at 16 seconds, each with its
+0.8-second prescribed transition. It then shows side (29 s), rear (34 s), forward
+(40 s), optical baseline (44 s) and transformed optics again (48 s), finishing
+paused at 0.999c at 54 seconds. Manual speed, view or baseline control interrupts
+the automated sequence. A visibility boundary resets the
 wall-clock timestamp. Long hidden intervals do not advance this educational timeline.
 
 ## Colour approximation
@@ -79,6 +97,11 @@ The procedural nebula uses a qualitative spectral tint. The optional frequency
 map has explicitly labelled false colours and display-only clamps. Raw D and the
 numerical readouts are unaffected by either colour mode.
 
+The optical baseline uses the same scene, camera and lab reference positions with
+only the optical boost set to zero. Measurement beta, clocks and accumulated
+position remain unchanged. The baseline is explicitly labelled. It does not
+squash the cockpit or generated video, and does not modify the physical ratios.
+
 ## Lab worldlines and generated illustration
 
 The lab worldline preserves accumulated position and time. Straight manual
@@ -94,3 +117,9 @@ Reactor video occupies a separate panel. It is not transformed as a calibrated
 full-sphere source. Its direction sentence reads the same physics snapshot, but
 it never calculates gamma or supplies numerical overlays. Instruction acceptance
 proves scheduling only, not optical correctness or immediate synchronisation.
+Directions coalesce meaningful speed regimes, broad view changes and the optical
+baseline. A 450 ms debounce and one request in flight prevent per-frame traffic.
+The latest pending direction replaces older pending values. Current local state,
+last actual send, last acknowledgement and frame-confirmed playback are distinct;
+an old accepted beta can legitimately describe the same unchanged artistic regime.
+A displayed timeline belongs to that acknowledged instruction, not current beta.

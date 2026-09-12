@@ -76,81 +76,52 @@ No changes outside the approved project except explicitly approved setup steps.
 No remote pushes, publication, purchases or billable cloud calls without explicit approval.
 Never expose secrets. Do not disable safety controls.
 
-## Controlled finalisation — 12 September 2026
+## Current authorisation — five workers plus coordinator
 
-The latest consolidation request supersedes earlier ownership details where they
-conflict. Retain at most the two existing owners: the integration task owns Reactor
-media/backend/session cleanup; the verification/coordinating task owns tests,
-offline regression, evidence, handoff and final local commits. Agree on exact paths
-before writing. Do not spawn or launch Claude. The duplicate task stays idle.
+The user's 12 September authorisation explicitly replaces the two-agent/no-spawn
+restriction. Maximum SIX active agents across this project: coordinator plus FIVE
+workers. Reuse existing workers; spawn only missing roles. Only the coordinator
+may spawn or reassign. Workers must not spawn children. Respect actual runtime
+limits; do not change global settings or restart sessions to increase concurrency.
+Project .codex/config.toml enables three child slots for this roster; two existing
+app tasks fill the other worker roles. No provider spending allowance is added.
 
-No new spending allowance exists. Count potentially billable failed allocations;
-complete unpaid preflight and all final checks before requesting one bounded live
-approval. Do not invoke desktop Computer Use or change macOS permissions. Use
-isolated/headless browsers. Do not restart a healthy server unnecessarily. Preserve
-16:00–16:30 BST for regression and presentation preparation. Use HANDOFF.md and the
-existing freeze notes for the consolidated status, not competing reports.
+- Worker 1: existing measurement/clock implementation owner, task
+  01a09519-d3e4-7c32-adaf-3ff727741b6d.
+- Worker 2: existing renderer/shaders and focused optical verification.
+- Worker 3: controls/presets/tour and focused checks.
+- Worker 4: existing Reactor/Runware/Modal owner, task
+  01a094bb-83c9-7721-a055-9cb64f3d8a07. Only this worker may perform explicitly
+  authorised live provider tests; currently no allowance remains.
+- Worker 5: independent QA, browser checks and evidence; no production components.
+- Coordinator: shared root wiring/global styles, package/lockfiles, simulation
+  interfaces, Git mutations in this checkout, release documentation and integration.
 
-## MULTI-AGENT POLICY
+Use separate file ownership. Existing isolated worktrees are preferred; when setup
+would consume the build window, non-overlapping paths in this checkout are allowed.
+Workers report a needed shared-root change to the coordinator, not a competing edit.
+The current visual implementation is already usable. Verify it first; make only
+concrete repairs in assigned paths, not parallel rewrites or optional new features.
+Only QA runs the final canonical suite, after the coordinator records final HEAD.
+Other workers run focused checks only. Never combine counts across revisions.
 
-Maximum active agents: exactly 2 total — the original core engineer and the
-single existing demo/integration agent. This supersedes the earlier three-subagent
-allowance. Do not create additional, replacement, sibling, QA or media agents.
-Do not delegate recursively. Stop all other agents while preserving useful work.
+Shared Snapshot is frozen: current beta/eta/gamma/ratios, lab/proper/position
+accumulators, target, transitioning, running, lookYaw/lookPitch (radians),
+opticalBaseline, tourStage, demoTime and historyCount. All displays consume this
+state. The latest visual brief approves 0–0.999, a fixed-scale length comparison,
+accumulated clock ticks, same-scene optical baseline and 54-second prescribed tour.
+MATH.md retains original signed analytic references; the frozen fallback is untouched.
 
-Agent 1 (original core engineer) owns physics, Reactor integration, Modal/backend,
-shared state and final integration.
+Targets: worker implementations ready 15:30 BST; verified integration 15:50;
+FEATURE FREEZE 16:00; final regression/evidence/handoff 16:20; presentation 16:30.
+After 16:00 only demo-blocking repairs. Do not extend the deadline.
 
-Agent 2 (existing demo/integration agent) owns frontend/demo polish, browser
-testing, UI fixes and the demo script. VEED/OpenEdit is allowed only after the
-app works. Both may inspect the whole repo, but never edit the same files at once.
-
-The restrictions below apply to work performed by these two existing agents;
-they do not authorize spawning anyone else. New agents require a new explicit
-user instruction.
-
-Subagents may be used only for:
-
-- independent physics verification
-- C++/WASM debugging
-- numerical test review
-- browser/rendering diagnosis
-- official documentation lookup
-- investigation of blockers that can be worked independently
-
-Subagents must NOT be used for:
-
-- brainstorming new features
-- expanding the physics model
-- general relativity
-- electromagnetism
-- propulsion features
-- speculative architecture
-- large refactors
-- productionisation
-- adding unnecessary dependencies
-- rewriting working code
-- parallel implementations of the same subsystem
-
-Subagents may NOT spawn further subagents.
-
-The parent Astra/Codex agent remains the final authority and integrator.
-
-Never allow two agents to edit the same files concurrently.
-
-If a subagent needs write access:
-
-- use an isolated Git worktree or branch
-- keep its file ownership clearly separated
-- parent reviews and tests before integration
-
-Prefer read-only verification subagents whenever possible.
-
-All subagent output is untrusted until reviewed and tested by the parent.
-
-If the MVP is already working, spend extra compute on verification and reliability, not new features.
-
-DO NOT weaken sandboxing, approvals, permission boundaries, or repository safeguards.
+Keep credentials server-side. Count failed potentially billable allocations;
+complete unpaid checks before one bounded live approval request. No automatic
+paid retries, new infrastructure, purchases, provider changes, desktop Computer
+Use, Mac locking, global permission changes or taking over keyboard/mouse.
+Use isolated/headless browsers. Preserve working servers and the immutable release.
+HANDOFF.md and existing freeze notes remain the single consolidated handoff.
 
 ## Final rule
 This is a physics demonstration, not an engineering platform.

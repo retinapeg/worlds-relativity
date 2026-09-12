@@ -6,18 +6,35 @@ No new live allocation or generation is included in this finalisation.
 
 ## Ownership and local checkpoints
 
-Only the two existing owners are retained: **Build Relativity Drive demo** owns
-the scoped Reactor repair; **Implement relativity hackathon MVP** coordinates
-verification, evidence, documents and final commits. Integration writes stop before
-the final checkpoint/gate. The duplicate **Configure bounded multi-agent use** is
-idle. Actual task state is checked again for the final report. No new agents or Claude.
+The latest authorisation permits five specialist workers plus the coordinator.
+Actual reused/launched roster (only the coordinator assigns work and changes Git):
+
+| Role | Task identifier | Delivered scope / current responsibility |
+| --- | --- | --- |
+| Coordinator — Implement relativity hackathon MVP | 01a09533-734f-7781-871e-fb1a4854fbf0 | Shared wiring, source integration, documents, checkpoints and integrity receipt |
+| 1 — Configure bounded multi-agent use | 01a09519-d3e4-7c32-adaf-3ff727741b6d | Measurement/clock and initial controls implementation; writes released |
+| 2 — optics | /root/worker2_optics | Renderer verification and bounded display-exposure refinement |
+| 3 — controls | /root/worker3_controls | Manual controls/tour review and exact-cue regression; writes released |
+| 4 — Build Relativity Drive demo | 01a094bb-83c9-7721-a055-9cb64f3d8a07 | Unpaid sponsor review complete; sole executor of any subsequently approved live test |
+| 5 — independent QA | /root/worker5_qa | Canonical final-revision suite, browser checks and evidence inspection |
+
+The runtime permits three spawned children beside this coordinator. The two reused
+app tasks fill the other roles; six project agents does not mean six are always
+running. Project-local settings enable those three child slots using documented
+keys; no global settings, model, permissions or active session were changed.
+Strict non-overlapping ownership replaces worktree setup for this short pass.
+No worker spawns children. No additional provider spending is authorised.
 
 Recoverable baseline: `7078adaad74e78ae2783c63f8bb34b3ae90b00da` on `main`.
-The final reviewed source is the subsequent ordinary local commit shown by
+The completed 0–0.99 consolidation checkpoint is
+`c5669b70343a3f7b7099fa9800250fd44e045a78`; its passing receipt/logs/screenshots are
+preserved under `build/evidence/checkpoint-c5669b7/`. The subsequent visual brief
+is a separate candidate. Its final reviewed source is the ordinary commit shown by
 `git rev-parse HEAD`. Its exact hash, actual results, times and artifact names are
 recorded in `build/evidence/final-verification.json`. Browser runners record the
 revision and require a clean worktree. A receipt is valid only if its revision
-matches HEAD and all required checks passed. No push, amend, reset or clean.
+matches HEAD, the worktree is still clean and all required checks passed.
+No push, amend, reset or clean.
 
 ## Run and protect
 
@@ -29,10 +46,21 @@ matches HEAD and all required checks passed. No push, amend, reset or clean.
   `./scripts/npm.sh run preview -- --port 4174`.
 - Fallback: `./run_demo.sh --known-good`, normally port 4173. No rebuilding or
   downloads. Never alter `releases/20260912T110958Z`, its source, permissions or
-  pointer. This is the earlier 0–0.999 version; the current candidate uses 0–0.99.
+  pointer. The fallback has its original 0–0.999 controls and 66-second tour; the new
+  candidate has the newly approved 0–0.999 controls and 54-second tour.
 - Build only into `build/relativity-candidate`. Read MATH.md and DEMO_FREEZE.md.
 - Reserve **16:00–16:30 BST** for regression/rehearsal; present at 16:30. No features
   or dependency changes during that window.
+
+## Visible local demonstration
+
+The revised candidate prioritises immediate manual presets through 0.999c, a
+fixed-scale 100 m reference alongside the contracted silhouette, adjacent clocks
+with accumulated-time ticks, and a calculated constant-speed rate comparison.
+The optical baseline keeps camera/scene/position while disabling only the optical
+transform. Manual controls interrupt the 54-second tour. All measurement and
+clock values use current beta. PHYSICS.md explains the explicit visual limitations.
+The visual gate checks geometry ratios and screenshots, not only text values.
 
 ## Unpaid media repair
 
@@ -98,7 +126,9 @@ https://docs.reactor.inc/resources/rate-limits.
 
 QA.md defines the single final gate and receipt: TypeScript physics/lifecycle,
 Python backend, preserved native/WASM numerics, browser GPU comparisons, real UI
-smoke, complete provider-blocked tour, and separate synthetic Reactor preflight.
+smoke, complete provider-blocked 54-second tour, and separate synthetic Reactor preflight. Last sent, last acknowledged direction,
+current local view and advancing media remain distinct. Camera/regime/baseline
+directions are debounced and coalesced, not sent per animation frame.
 Expected offline Runware request errors remain visible in evidence. Do not merge
 historical counts into a claim about final HEAD.
 

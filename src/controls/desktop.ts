@@ -8,6 +8,7 @@ export function attachDesktop(canvas: HTMLCanvasElement, simulation: Simulation,
   };
   const move = (event: PointerEvent) => {
     if (!drag) return;
+    simulation.stopDemo();
     simulation.input.lookYaw -= (event.clientX - drag.x) * 0.004;
     simulation.input.lookPitch = Math.max(-1.3, Math.min(1.3,
       simulation.input.lookPitch + (event.clientY - drag.y) * 0.004));
@@ -21,9 +22,9 @@ export function attachDesktop(canvas: HTMLCanvasElement, simulation: Simulation,
     if (k === ' ') simulation.running = !simulation.running;
     else if (k === 'r') simulation.reset();
     else if (k === 'd') simulation.startDemo();
-    else if (k === 'f') { simulation.input.lookYaw = 0; simulation.input.lookPitch = 0; }
-    else if (k === 'arrowleft') simulation.input.lookYaw += 0.1;
-    else if (k === 'arrowright') simulation.input.lookYaw -= 0.1;
+    else if (k === 'f') simulation.setLook(0);
+    else if (k === 'arrowleft') simulation.setLook(simulation.input.lookYaw + 0.1, simulation.input.lookPitch);
+    else if (k === 'arrowright') simulation.setLook(simulation.input.lookYaw - 0.1, simulation.input.lookPitch);
     else return;
     event.preventDefault(); changed();
   };

@@ -1,7 +1,7 @@
 # RELATIVITY DRIVE — FROZEN MVP MATHEMATICS
 
 ## Active Worlds candidate, 12 September 2026
-The latest user brief narrows the **current TypeScript UI** to 0 ≤ β ≤ 0.99
+The 14:32 BST visual-priority brief extends the **current TypeScript UI** to 0 ≤ β ≤ 0.999
 and authorises accumulated 1D clock/position history plus optional generated
 illustration. c=1; lab time is seconds and x is light-seconds. Manual changes
 join constant-speed segments: Δτ=Δt/γ and Δx=βΔt. Past proper time is never

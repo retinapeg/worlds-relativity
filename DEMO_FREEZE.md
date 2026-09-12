@@ -2,10 +2,12 @@
 
 ## Active candidate — controlled finalisation, 12 September 2026
 
-HANDOFF.md is the single current status. The current candidate has 0–0.99 controls,
+HANDOFF.md is the single current status. The later visual-priority candidate has 0–0.999 controls,
 lab worldlines and a separate optional Reactor panel. Its final source commit and
 measured verification are recorded in `build/evidence/final-verification.json`,
-with the gate and evidence interpretation in QA.md. Git now has ordinary local
+with the gate and evidence interpretation in QA.md. The completed c5669b7
+0–0.99 pass is preserved under build/evidence/checkpoint-c5669b7; do not combine
+its counts/tour with the subsequent visual-priority candidate. Git now has ordinary local
 checkpoints; the unborn-HEAD statement below describes only the original freeze.
 
 Live Reactor media remains **UNVERIFIED**. No new paid allowance exists. Local
