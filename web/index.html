@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'">
+  <title>RELATIVITY DRIVE</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./style.css">
+  <script src="./bootstrap.js" defer></script>
+</head>
+<body>
+<main>
+  <header class="masthead">
+    <div class="identity"><span class="mark" aria-hidden="true">✳</span><div><h1>RELATIVITY DRIVE<span class="dot">.</span></h1><p>A different velocity. The same sky.</p></div></div>
+    <div class="edition">SPECIAL RELATIVITY<br><span>OBSERVER VELOCITY SNAPSHOTS / 01</span></div>
+  </header>
+  <div id="error" role="alert" hidden></div>
+  <section class="experiment" aria-label="Relativity experiment">
+    <div class="sky-panel">
+      <div class="sky-toolbar"><span class="eyebrow"><i></i> OBSERVER FRAME S′</span><span id="view-name">FORWARD / +X</span></div>
+      <div id="viewport" tabindex="0" aria-label="Starfield. Drag to look, or use arrow keys. Looking does not change velocity.">
+        <div id="loading">Loading the local sky…</div>
+        <div class="reticle" aria-hidden="true"></div>
+        <span class="source-label" id="source-0">+X · FORWARD</span>
+        <span class="source-label" id="source-1">−X · BACKWARD</span>
+        <span class="source-label" id="source-2">S TRANSVERSE</span>
+        <div class="sky-caption">SYNTHETIC DEMO CATALOGUE <span>2,000 SOURCES</span></div>
+      </div>
+      <div class="view-controls"><span>LOOK DIRECTION</span><div role="group" aria-label="Camera direction"><button data-view="forward" aria-pressed="true">Forward <b>↗</b></button><button data-view="side" aria-pressed="false">Side <b>→</b></button><button data-view="back" aria-pressed="false">Back <b>↙</b></button></div><small>Drag sky to look around</small></div>
+    </div>
+    <aside class="readouts" aria-label="Numerical Doppler readouts">
+      <div class="panel-title"><span class="eyebrow">01 / FREQUENCY SHIFT</span><span class="live-badge">LOCAL</span></div>
+      <h2>One sky.<br>New directions.</h2>
+      <p class="description">Move the speed slider. Aberration gathers the sky toward the direction of motion.</p>
+      <div class="table-caption">D = observed / catalogue frequency</div>
+      <table><thead><tr><th>Source in S</th><th>D</th><th>λ′ <span>nm</span></th></tr></thead><tbody>
+        <tr><th>Forward <small>μ = +1</small></th><td id="d-forward">—</td><td id="l-forward">—</td></tr>
+        <tr><th>Backward <small>μ = −1</small></th><td id="d-backward">—</td><td id="l-backward">—</td></tr>
+        <tr><th>Transverse <small>μ = 0 in S</small></th><td id="d-transverse">—</td><td id="l-transverse">—</td></tr>
+      </tbody></table>
+      <p class="calibration">λ′ for a hypothetical <strong>550 nm</strong> line.<br>UV / infrared shifts do not imply a whole star disappears.</p>
+      <div class="legend"><div class="legend-bar"></div><div class="legend-ticks"><span>REDSHIFT<br><b>D &lt; 1</b></span><span>NEUTRAL<br><b>D = 1</b></span><span>BLUESHIFT<br><b>D &gt; 1</b></span></div><p>Doppler false colour — not literal eye appearance</p><small>Colour maps log(D); saturates at ¼× / 4×.<br>Point brightness is fixed and illustrative.</small></div>
+    </aside>
+  </section>
+  <section class="speed-panel" aria-label="Velocity controls">
+    <div class="speed-heading"><div><label for="speed" class="eyebrow">02 / OBSERVER SPEED</label><div class="speed-value"><output id="beta">0.0000</output><span>c</span></div></div><div class="velocity-details"><span>LORENTZ FACTOR <b>γ <output id="gamma">1.0000</output></b></span><span>RAPIDITY <b>η <output id="eta">0.0000</output></b></span><span>FIXED BOOST AXIS <b>u = (+1, 0, 0)</b></span></div><button id="reset" class="reset">Reset <span>↺</span></button></div>
+    <input id="speed" type="range" min="0" max="1" value="0" step="any" disabled aria-label="Observer speed (uniform rapidity)">
+    <div class="slider-scale"><span>REST</span><span>UNIFORM RAPIDITY →</span><span>0.9999c</span></div>
+    <div class="preset-row"><span>SET SPEED</span><div role="group" aria-label="Speed presets"><button data-preset="0" aria-pressed="true">Rest</button><button data-preset="1" aria-pressed="false">0.6c</button><button data-preset="2" aria-pressed="false">0.9c</button><button data-preset="3" aria-pressed="false">0.99c</button><button data-preset="4" aria-pressed="false">0.9999c</button></div><span class="camera-note">Turning the camera never changes velocity.</span></div>
+  </section>
+  <footer><span>FLAT SPACETIME · DISTANT STATIONARY SOURCES · NO TRAVEL SIMULATION</span><span id="status" role="status">INITIALISING</span></footer>
+</main>
+<noscript>This demonstration needs JavaScript and WebAssembly enabled.</noscript>
+</body>
+</html>
