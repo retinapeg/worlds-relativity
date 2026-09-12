@@ -38,6 +38,8 @@ function World({ snapshot }: { snapshot: Snapshot }) {
   const subscriptions = useRef<(() => void)[]>([]);
   const [step, setStep] = useState('idle'), [message, setMessage] = useState('');
   const [playing, setPlaying] = useState(false), [remaining, setRemaining] = useState(180);
+  const playbackProved = useRef(false);
+  const [sessionVerified, setSessionVerified] = useState(false);
   const [playBlocked, setPlayBlocked] = useState(false);
   const [sent, setSent] = useState<{ key: string; text: string } | null>(null);
   const [accepted, setAccepted] = useState<{ key: string; text: string } | null>(null);
@@ -52,9 +54,25 @@ function World({ snapshot }: { snapshot: Snapshot }) {
   const [openingArtwork, setOpeningArtwork] = useState(false);
   const [mediaEvidence, setMediaEvidence] = useState('No stream requested.');
 
+  useEffect(() => {
+    const element = video.current;
+    if (!playing || !element) return;
+    let previousTime = element.currentTime, previousFrames = element.getVideoPlaybackQuality?.().totalVideoFrames ?? 0;
+    let continuous = 0;
+    const timer = setInterval(() => {
+      const frames = element.getVideoPlaybackQuality?.().totalVideoFrames ?? 0, time = element.currentTime;
+      const box = element.getBoundingClientRect();
+      continuous = !element.paused && box.width > 100 && box.height > 60 && time > previousTime && frames > previousFrames ? continuous + 1 : 0;
+      if (continuous >= 7) playbackProved.current = true;
+      previousTime = time; previousFrames = frames;
+    }, 500);
+    return () => clearInterval(timer);
+  }, [playing]);
+
   const stop = async (reason = 'stopped') => {
     if (closing.current) return;
     const interruptedSetup = busy.current && !session.current;
+    let remoteConfirmed = false, cleanupOk = true;
     closing.current = true; generation.current++; busy.current = true;
     clearTimeout(timeout.current);
     clearTimeout(mediaTimeout.current);
@@ -87,25 +105,28 @@ function World({ snapshot }: { snapshot: Snapshot }) {
       const travelId = apiRef.current.travelState?.encrypted_travel_id;
       if (credentialsRef.current && travelId) {
         await endRemoteTravel(credentialsRef.current, travelId);
+        remoteConfirmed = true;
         setStopConfirmed(true);
       }
     }
-    catch { setMessage('Direct world stop was not confirmed; closing its Reactor session.'); }
+    catch { cleanupOk = false; setMessage('Direct world stop was not confirmed; closing its Reactor session.'); }
     finally {
       if (active) void active.travel.end().catch(() => {});
       try { await finishWithin(apiRef.current.disconnect()); }
-      catch { setNeedsReload(true); setMessage('Disconnect is unconfirmed. Reload before reconnecting; the server enforces a 5-minute session cap.'); }
+      catch { cleanupOk = false; setNeedsReload(true); setMessage('Disconnect is unconfirmed. Reload before reconnecting; the server enforces a 5-minute session cap.'); }
       finally {
         // Aliyun can leave a cancelled join promise unresolved. Release its
         // documented singleton and keep late cleanup attached without waiting
         // forever for that promise. Remote end confirmation is separate.
         if (active || pending) {
           try { await finishWithin((async () => { const { AliRtcEngine } = await import('aliyun-rtc-sdk'); await AliRtcEngine.getInstance().destroy(); })()); }
-          catch { setNeedsReload(true); setMessage('Media cleanup needs a page reload before reconnecting.'); }
+          catch { cleanupOk = false; setNeedsReload(true); setMessage('Media cleanup needs a page reload before reconnecting.'); }
         }
         if (pending) void pending.then(late => { detach(); return late.travel.end(); }).catch(() => {});
         pendingTravel.current = null;
         credentialsRef.current = null;
+        if (playbackProved.current && remoteConfirmed && cleanupOk && !pending && !interruptedSetup && attached?.srcObject === null)
+          setSessionVerified(true);
         closing.current = false; busy.current = false; setStep(reason);
       }
     }
@@ -125,6 +146,7 @@ function World({ snapshot }: { snapshot: Snapshot }) {
     if (busy.current || session.current || needsReload) return;
     busy.current = true;
     const id = ++generation.current;
+    playbackProved.current = false; setSessionVerified(false);
     const current = () => generation.current === id;
     setMessage(''); setSent(null); setAccepted(null); setPlaying(false); setPlayBlocked(false); setStep('authorising'); setStopConfirmed(false); setVideoEpoch(old => old + 1);
     setInstructionState('Waiting for a live world'); setRemaining(180); setAckDelay(null);
@@ -258,9 +280,9 @@ function World({ snapshot }: { snapshot: Snapshot }) {
         {!active && <span>{artwork.image ? 'RUNWARE STARTING FRAME · HAPPYOYSTER DIRECTING' : 'HAPPYOYSTER · DIRECTING MODE'}</span>}</div>}
       {playing && <span className="world-countdown">{remaining}s remaining</span>}
     </div>
-    {artwork.url && !playing && <figure className="runware-frame">
+    {artwork.url && <figure className="runware-frame">
       <img src={artwork.url} alt="Runware-generated cockpit approaching an illuminated orbital gate" onLoad={() => setArtworkVisible(true)} onError={() => setArtworkVisible(false)} />
-      <figcaption>Runware-generated artwork · illustrative still</figcaption>
+      <figcaption>Runware-generated artwork · FLUX.1 [dev] ({artwork.status?.model ?? 'runware:101@1'}) · illustrative still</figcaption>
     </figure>}
     <p className="ai-label">AI-generated illustration — not an exact relativistic optical rendering.</p>
     <div className="artwork-status" role="status"><span>{artwork.message}</span>
@@ -279,13 +301,15 @@ function World({ snapshot }: { snapshot: Snapshot }) {
     {message && <p className="provider-error" role="alert">{message} Local science remains available.</p>}
     <div className="sponsor-provenance" data-testid="world-provenance">
       <span>PHYSICS — Local deterministic SR engine · ● ACTIVE</span>
-      <span>AI WORLD — Reactor / HappyOyster · {playing ? '● ACTIVE' : step === 'failed' ? '× BLOCKED' : '○ READY / UNVERIFIED'}</span>
-      <span>VISUAL ASSET — Runware · {artworkVisible && (!playing || openingArtwork) ? '● ACTIVE' : artwork.status?.attempted && !artwork.status.ready ? '× BLOCKED' : '○ READY / UNVERIFIED'}</span>
+      <span>AI WORLD — Reactor / HappyOyster · {sessionVerified ? '● ACTIVE · last session verified' : '○ READY / UNVERIFIED'}</span>
+      <span>VISUAL ASSET — Runware · {artworkVisible ? '● ACTIVE' : artwork.status?.attempted && !artwork.status.ready ? '× BLOCKED' : '○ READY / UNVERIFIED'}</span>
       <span>BACKEND — Modal · {backend === 'modal' || (artwork.image || artwork.status?.attempted) && artwork.status?.hosting === 'modal' ? '● ACTIVE' : '○ READY / UNVERIFIED'}</span>
     </div>
     <details className="world-diagnostics"><summary>Connection details</summary><p>Reactor: {api.phase} · Last connected world snapshot: {api.worldState?.phase ?? 'none'} · Travel: {stopConfirmed ? 'completed (end confirmed)' : api.travelState?.status ?? 'none'}</p>
       <p>{stopConfirmed ? 'Provider confirmed travel ended.' : 'No travel-end confirmation for this connection.'}</p>
       <p>{mediaEvidence}</p>
+      <p>{sessionVerified ? 'Last session: visible playback and remote/local cleanup verified. Current playback is shown separately above.' : 'Playback and cleanup have not both been verified for this session.'}</p>
+      <p>{openingArtwork ? 'Opening image supplied: Runware.' : 'No Runware opening image supplied to this world.'}</p>
       {blockedOrigins.length > 0 && <p>Blocked network origins: {blockedOrigins.join(', ')}</p>}
       <p>Instruction acceptance describes provider scheduling, not exact imagery or instantaneous synchronisation. Display colour is illustrative.</p>
       <p data-testid="world-sent-direction">Last sent: {sent?.key ?? 'none'}</p>

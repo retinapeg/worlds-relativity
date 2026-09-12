@@ -1,5 +1,21 @@
 # RELATIVITY DRIVE — PROJECT CONTRACT
 
+## Current sponsor completion — explicit user approval, 12 September 2026
+
+The user approved one additional Runware still through the existing Modal bridge
+(expected cost at most US$1), and one Reactor session attempt (US$5 intended
+budget, existing 300-second provider duration cap, no hard dollar cap).
+The existing sponsor owner alone executes these allowances. Failed attempts count;
+no retries, purchases, new agents, provider changes or physics rewrites are allowed.
+
+The new Runware attempt returned HTTP 400 `insufficientCredits`; it produced no
+asset or reported cost. Both its durable marker and the earlier marker are
+preserved, and generation is disabled. No Runware allowance remains. Reactor
+verification must prove actual visible advancing frames and successful cleanup;
+until then retain READY / UNVERIFIED. Record its outcome in HANDOFF.md.
+Keep the verified passage candidate on 4177 and all earlier snapshots intact.
+Any sponsor frontend changes use a separate candidate on 4178.
+
 ## Current physics / visual correction — 12 September 2026
 
 The user's latest explicit correction authorises only a fixed asymmetric finite

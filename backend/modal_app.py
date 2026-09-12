@@ -19,6 +19,7 @@ artwork = modal.Volume.from_name("relativity-world-artwork", create_if_missing=T
 @app.function(image=image, secrets=[credentials], max_containers=1,
               volumes={"/world-assets": artwork},
               env={"WORLD_ASSET_CACHE": "/world-assets", "WORLD_ASSET_VOLUME": "relativity-world-artwork",
+                   "RUNWARE_APPROVED_ATTEMPT": os.getenv("RUNWARE_APPROVED_ATTEMPT", "initial"),
                    "RUNWARE_GENERATION_ALLOWANCE": os.getenv("RUNWARE_GENERATION_ALLOWANCE", "0")},
               scaledown_window=30, timeout=150, cpu=0.25, memory=256)
 @modal.asgi_app()

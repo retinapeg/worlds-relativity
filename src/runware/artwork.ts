@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-type ArtworkStatus = { hosting?: string; ready: boolean; can_generate: boolean; configured: boolean; attempted: boolean; cost_usd: number | null };
+type ArtworkStatus = { hosting?: string; model?: string; failure?: { http_status: number; errors: { code?: string; parameter?: string; message?: string }[] } | null; ready: boolean; can_generate: boolean; configured: boolean; attempted: boolean; cost_usd: number | null };
 const headers = { 'X-Relativity-Client': '1' };
 export function useRunwareArtwork() {
   const [status, setStatus] = useState<ArtworkStatus | null>(null);
@@ -27,7 +27,7 @@ export function useRunwareArtwork() {
       setMessage('Runware artwork: cached real output.');
     } else setMessage(!data.configured ? 'Runware artwork: BLOCKED — server key missing.' :
       data.can_generate ? 'Runware artwork: ready — one image allowed.' :
-      data.attempted ? 'Runware artwork: BLOCKED — allowance used; check generation status.' : 'Runware artwork: BLOCKED — generation approval needed.');
+      data.attempted ? `Runware artwork: BLOCKED — ${data.failure ? `HTTP ${data.failure.http_status}. ${data.failure.errors[0]?.message ?? data.failure.errors[0]?.code ?? 'Request rejected.'}` : 'allowance used; check generation status.'}` : 'Runware artwork: BLOCKED — generation approval needed.');
   };
   useEffect(() => {
     mounted.current = true;

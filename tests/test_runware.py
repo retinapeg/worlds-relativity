@@ -89,3 +89,30 @@ def test_reject_invalid_provider_artwork(change):
     if change == "corrupt": row["imageBase64Data"] = base64.b64encode(PNG[:-1] + bytes([PNG[-1] ^ 1])).decode()
     with pytest.raises(ValueError):
         runware.decode_frame({"data": [row]}, "expected")
+
+
+def test_rejected_request_keeps_safe_diagnostics_without_leaking_credentials(monkeypatch):
+    monkeypatch.setenv('RUNWARE_API_KEY', 'fake-test-key')
+    monkeypatch.setenv('RUNWARE_GENERATION_ALLOWANCE', '1')
+    post=AsyncMock(return_value=httpx.Response(400,json={'errors':[{'code':'invalidParameter','parameter':'model','message':'fake-test-key test-only Bearer '+('x'*36),'raw':'must not persist'}]}))
+    monkeypatch.setattr(httpx.AsyncClient,'post',post)
+    assert client.post('/api/runware/frame',headers=HEADERS).status_code==502
+    response=client.get('/api/runware/status',headers=HEADERS)
+    assert response.json()['failure']['errors'][0]['code']=='invalidParameter'
+    for secret in ['fake-test-key','test-only','x'*36,'must not persist']:
+        assert secret not in response.text
+    assert client.post('/api/runware/frame',headers=HEADERS).status_code==409
+    assert post.await_count==1
+
+
+def test_new_explicit_allowance_preserves_the_previous_attempt_and_still_runs_once(monkeypatch):
+    old=runware.cache_dir()/'attempted';old.write_text('preserved first attempt')
+    monkeypatch.setenv('RUNWARE_APPROVED_ATTEMPT','20260912-second')
+    monkeypatch.setenv('RUNWARE_API_KEY','fake-test-key')
+    monkeypatch.setenv('RUNWARE_GENERATION_ALLOWANCE','1')
+    post=AsyncMock(return_value=httpx.Response(400,json={'errors':[{'code':'rejected'}]}))
+    monkeypatch.setattr(httpx.AsyncClient,'post',post)
+    assert client.post('/api/runware/frame',headers=HEADERS).status_code==502
+    assert client.post('/api/runware/frame',headers=HEADERS).status_code==409
+    assert old.read_text()=='preserved first attempt'
+    assert runware.attempt_path().exists() and post.await_count==1
