@@ -1,5 +1,14 @@
 # Worlds — controlled final handoff
 
+Final sponsor result at16:25 BST: the single approved Runware still request
+(runware:101@1 / FLUX.1 dev) was rejected with provider HTTP400. No image or
+reported cost was returned; no retry was made. The attempted marker prevents
+a second request and allowance is being restored to zero. Exact evidence:
+build/evidence/runware-approved-generation.json. Modal's provider path was
+exercised. Reactor playback remains UNVERIFIED; no new Reactor allocation was
+authorised or performed. The local presentation remains independent.
+
+
 ## Final cinematic presentation — user override at 16:18 BST
 
 The latest user instruction supersedes the earlier dashboard layout and short

@@ -281,7 +281,7 @@ function World({ snapshot }: { snapshot: Snapshot }) {
       <span>PHYSICS — Local deterministic SR engine · ● ACTIVE</span>
       <span>AI WORLD — Reactor / HappyOyster · {playing ? '● ACTIVE' : step === 'failed' ? '× BLOCKED' : '○ READY / UNVERIFIED'}</span>
       <span>VISUAL ASSET — Runware · {artworkVisible && (!playing || openingArtwork) ? '● ACTIVE' : artwork.status?.attempted && !artwork.status.ready ? '× BLOCKED' : '○ READY / UNVERIFIED'}</span>
-      <span>BACKEND — Modal · {backend === 'modal' || artwork.image && artwork.status?.hosting === 'modal' ? '● ACTIVE' : '○ READY / UNVERIFIED'}</span>
+      <span>BACKEND — Modal · {backend === 'modal' || (artwork.image || artwork.status?.attempted) && artwork.status?.hosting === 'modal' ? '● ACTIVE' : '○ READY / UNVERIFIED'}</span>
     </div>
     <details className="world-diagnostics"><summary>Connection details</summary><p>Reactor: {api.phase} · Last connected world snapshot: {api.worldState?.phase ?? 'none'} · Travel: {stopConfirmed ? 'completed (end confirmed)' : api.travelState?.status ?? 'none'}</p>
       <p>{stopConfirmed ? 'Provider confirmed travel ended.' : 'No travel-end confirmation for this connection.'}</p>
