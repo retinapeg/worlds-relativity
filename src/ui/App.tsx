@@ -98,7 +98,7 @@ export function App() {
   const look = (yaw: number) => { simulation.setLook(yaw); refresh(); };
   const reset = () => { simulation.reset(); refresh(); };
   const experience = () => { simulation.setVelocity(MAX_BETA); simulation.opticalBaseline = false; simulation.running = true; refresh(); };
-  const burst = () => { simulation.startBurst(); refresh(); };
+  const burst = () => { simulation.opticalBaseline = false; simulation.startBurst(); refresh(); };
   const demo = () => {
     if (simulation.demoTime !== null) { simulation.stopDemo(); simulation.running = false; }
     else simulation.startDemo();
