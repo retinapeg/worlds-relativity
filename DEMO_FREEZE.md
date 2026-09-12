@@ -1,19 +1,23 @@
 # DEMO FREEZE
 
-## Active Worlds candidate — 12 September, 13:28 BST
+## Active candidate — controlled finalisation, 12 September 2026
 
-The status below describes the preserved snapshot, not the newer sponsor candidate.
-The current 0–0.99 candidate adds lab worldlines and a separate Reactor panel;
-25 frontend tests, 12 backend tests, typecheck and production build passed. Modal
-auth and real Reactor instruction execution/end were verified, but playable video
-was not. The final two-origin media CSP repair is not live-retested because both
-authorised travel tests are used. Do not freeze this as a verified streaming demo.
-The original snapshot's 57 runtime/export and 49 source hashes still match.
-Final headless production smoke and a full66-secondprovider-blocked source tour
-passed (lab66.000000 s / traveller35.755318 s). Optional Runware is wired but
-disabled without a key and explicit generation allowance; no image generated.
+HANDOFF.md is the single current status. The current candidate has 0–0.99 controls,
+lab worldlines and a separate optional Reactor panel. Its final source commit and
+measured verification are recorded in `build/evidence/final-verification.json`,
+with the gate and evidence interpretation in QA.md. Git now has ordinary local
+checkpoints; the unborn-HEAD statement below describes only the original freeze.
 
-## Preserved frozen release
+Live Reactor media remains **UNVERIFIED**. No new paid allowance exists. Local
+synthetic media preflight is not live-provider proof. Runware is **BLOCKED**, with
+no generated/cached image observed. Retain the existing Modal deployment.
+
+Build and test candidates separately. Preserve all 57 runtime/export hashes and
+49 source hashes of the original snapshot. Do not overwrite the frozen source,
+assets, permissions, pointer or an existing tag. Reserve 16:00–16:30 BST for
+regression and demo preparation. No new features or dependency changes.
+
+## Preserved frozen release — historical record at 11:09 UTC
 
 Status: FROZEN — local TypeScript/Three.js MVP
 Candidate build: build/relativity-candidate

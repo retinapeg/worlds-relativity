@@ -1,26 +1,14 @@
-# External actions remaining
+# Remaining external setup
 
-## Live video verification allowance
+The one decision requested is the **single-allocation Reactor live test in
+HANDOFF.md**. Existing allowances are exhausted. No test starts until fresh explicit
+approval covers attempted allocations, duration and spending uncertainty. Unpaid
+fixtures do not establish Reactor playback.
 
-Both authorised Reactor travel tests have been used. Authentication, world creation,
-an accepted/executed instruction and final explicit remote stop succeeded, but no
-playable video arrived. Two required media origins have now been added to the CSP.
+Runware stays **BLOCKED** without a server-side key and separate generation
+allowance. No cached output was observed. It is unnecessary for the local demo or
+the proposed Reactor test.
 
-Required action: explicitly authorise **one additional Reactor travel test, at most
-three minutes**, to verify this repair. No test starts until approval. Check nonzero
-video dimensions and advancing frames, direct a 0→0.6 speed change, then stop and
-verify the provider's completed acknowledgement. If it still fails, retain the
-local demo and report the precise media error; do not keep creating worlds.
-
-## Optional Runware starting image
-
-The integration is ready but no image has been generated. Provide a Runware key
-through the ignored server environment and explicitly approve a spending scope for
-one1024×576starting image. The core engineer can then configure the Modal secret
-and allowance. Until then, generation remains disabled and the local sky works.
-
-No desktop Computer Use or macOS permission changes are required. Browser checks
-can run with the existing headless Chrome installation.
-
-There is no outstanding Reactor-key, credit, model-access or Modal-login blocker
-observed by this task. Do not paste credentials into browser code or handoff logs.
+The retained Modal bridge and primary Reactor authentication worked previously;
+no new login/key blocker was observed. No desktop Computer Use, macOS change,
+Claude launch, provider switch or new deployment is required.

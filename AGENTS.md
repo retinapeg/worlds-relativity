@@ -76,6 +76,21 @@ No changes outside the approved project except explicitly approved setup steps.
 No remote pushes, publication, purchases or billable cloud calls without explicit approval.
 Never expose secrets. Do not disable safety controls.
 
+## Controlled finalisation — 12 September 2026
+
+The latest consolidation request supersedes earlier ownership details where they
+conflict. Retain at most the two existing owners: the integration task owns Reactor
+media/backend/session cleanup; the verification/coordinating task owns tests,
+offline regression, evidence, handoff and final local commits. Agree on exact paths
+before writing. Do not spawn or launch Claude. The duplicate task stays idle.
+
+No new spending allowance exists. Count potentially billable failed allocations;
+complete unpaid preflight and all final checks before requesting one bounded live
+approval. Do not invoke desktop Computer Use or change macOS permissions. Use
+isolated/headless browsers. Do not restart a healthy server unnecessarily. Preserve
+16:00–16:30 BST for regression and presentation preparation. Use HANDOFF.md and the
+existing freeze notes for the consolidated status, not competing reports.
+
 ## MULTI-AGENT POLICY
 
 Maximum active agents: exactly 2 total — the original core engineer and the

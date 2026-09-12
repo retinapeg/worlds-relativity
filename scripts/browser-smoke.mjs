@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { resolve } from 'node:path';
+import { execFileSync } from 'node:child_process';
 
 const require = createRequire(import.meta.url);
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
@@ -11,11 +12,16 @@ const origin = process.env.DEMO_URL || 'http://127.0.0.1:5173';
 const folder = resolve('build/evidence');
 const label = process.env.QA_LABEL || 'qa-candidate';
 assert.match(label, /^[a-zA-Z0-9_-]+$/);
+const sourceRevision = execFileSync('git', ['rev-parse', 'HEAD'], { encoding:'utf8' }).trim();
+const sourceTree = execFileSync('git', ['rev-parse', 'HEAD^{tree}'], { encoding:'utf8' }).trim();
+const sourceChanges = execFileSync('git', ['status', '--porcelain'], { encoding:'utf8' }).trim();
+if (process.env.REQUIRE_CLEAN === '1') assert.equal(sourceChanges, '', 'final smoke requires committed source');
 await mkdir(folder, { recursive: true });
 const browser = await chromium.launch({ headless: true, chromiumSandbox: true,
   ...(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {}) });
-const results = { url: origin, checkedAt: new Date().toISOString(), checks: [],
-  pageErrors: [], consoleErrors: [], failedRequests: [], externalRequests: [] };
+const results = { url: origin, sourceRevision, sourceTree, sourceChanges,
+  checkedAt: new Date().toISOString(), checks: [], pageErrors: [], consoleErrors: [],
+  failedRequests: [], expectedBlockedRequests: [], externalRequests: [], blockedProviderPosts: [] };
 const check = (name, detail) => { results.checks.push({ name, detail }); console.log(`PASS ${name}`); };
 const number = async (page, id) => Number(await page.getByTestId(id).textContent());
 const seconds = async (page, kind) => Number(await page.getByTestId(`${kind}-time`).getAttribute('data-seconds'));
@@ -34,11 +40,17 @@ try {
     if (url.origin !== new URL(origin).origin) {
       results.externalRequests.push(url.origin + url.pathname); return route.abort();
     }
-    if (url.pathname.startsWith('/api/') && (process.env.BLOCK_PROVIDERS === '1' || request.method() !== 'GET')) return route.abort();
+    if (url.pathname.startsWith('/api/')) {
+      if (request.method() !== 'GET') { results.blockedProviderPosts.push(url.pathname); return route.abort(); }
+      if (process.env.BLOCK_PROVIDERS === '1') {
+        results.expectedBlockedRequests.push(url.pathname); return route.abort();
+      }
+    }
     return route.continue();
   });
   await page.goto(origin, { waitUntil: 'networkidle' });
   await page.waitForFunction(() => document.querySelector('.connection')?.textContent?.includes('LOCAL SIMULATION'), null, { timeout: 25000 });
+  await page.waitForFunction(() => !document.querySelector('.artwork-status')?.textContent?.includes('Checking starting artwork'), null, { timeout:20000 });
   await page.getByRole('button', { name: /Reset/ }).click();
   near(await number(page, 'beta'), 0, 0, 'rest beta');
   near(await number(page, 'gamma'), 1, 0, 'rest gamma');
@@ -99,7 +111,11 @@ try {
   await page.getByText('Display & science', { exact: false }).click();
   const graphics = await page.locator('.details-panel').textContent();
   assert.match(graphics, /483.*passed/);
-  check('483 real GPU photon-ray checks', graphics.match(/483[^\n]*?error[^\n]*?(?:e[-+]?\d+|\d\.\d+)/)?.[0]);
+  const probe = graphics.match(/(\d+) GPU rays passed · max relative-scaled error ([\d.eE+-]+)/);
+  assert.ok(probe, 'complete GPU probe result');
+  const rayCount = Number(probe[1]), maxRelativeScaledError = Number(probe[2]);
+  assert.equal(rayCount, 483); assert.ok(Number.isFinite(maxRelativeScaledError) && maxRelativeScaledError <= 2e-4);
+  check('483 real GPU photon-ray checks', { rayCount, maxRelativeScaledError });
   await page.getByText('Display & science', { exact: false }).click();
 
   if (process.env.RUN_TOUR === '1') {
@@ -112,6 +128,16 @@ try {
     await capture(page, 'tour-complete');
   }
   assert.deepEqual(results.pageErrors, [], 'uncaught browser errors');
+  assert.deepEqual(results.externalRequests, [], 'local UI must not request external resources');
+  assert.deepEqual(results.blockedProviderPosts, [], 'local UI must not try to create provider sessions');
+  const unexpectedFailures = results.failedRequests.filter(r => !results.expectedBlockedRequests.includes(r.url));
+  assert.deepEqual(unexpectedFailures, [], 'unexpected failed browser requests');
+  const unexpectedConsole = results.consoleErrors.filter(text => !(
+    results.expectedBlockedRequests.length && /^Failed to load resource: net::ERR_FAILED$/.test(text)));
+  assert.deepEqual(unexpectedConsole, [], 'unexpected console errors');
+  assert.ok(results.consoleErrors.length <= results.expectedBlockedRequests.length, 'no excess console resource errors');
+  check('Browser request and console audit', { expectedBlockedRequests:results.expectedBlockedRequests,
+    expectedConsoleErrors:results.consoleErrors.length, unexpectedFailures, unexpectedConsole });
   check('No uncaught browser errors');
 } catch (error) {
   results.failure = error.message;

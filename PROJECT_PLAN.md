@@ -1,24 +1,14 @@
-# Worlds — current project plan
+# Worlds — finalisation plan
 
-Updated 12 September 2026, 13:28 BST. Demo target 16:30; feature freeze by 16:00.
+The local MVP is implemented. **HANDOFF.md** is the single current handoff.
 
-1. Preserve local Three.js flight and immutable offline release. **Done.**
-2. Add requested 0–0.99 controls, incremental clocks, coordinate ruler,
-   frequency/wavelength indicators and lab worldlines using one SR engine. **Done.**
-3. Configure ignored credentials and protected FastAPI token exchange. **Done.**
-4. Deploy the same CPU backend to authenticated Modal. **Done and verified.**
-5. Exercise real directing worlds and authoritative instruction timeline.
-   **Auth, world, instruction acceptance/execution and final remote stop verified.**
-   **Video remains unverified.** Final media-origin fix awaits new test allowance.
-6. Browser/build checks, startup/handoff/rehearsal documents. **Done.**
-   Evidence in QA.md and HANDOFF.md.
+1. Preserve the frozen release and make a reviewed, secret-scanned local baseline.
+2. Finish unpaid media/lifecycle preflight with the two existing owners.
+3. Stop integration writes, review and commit the final intended source.
+4. Execute QA.md's full gate against that exact clean revision; record actual
+   results in `build/evidence/final-verification.json`.
+5. Present one bounded approval request for Reactor verification. No allocation
+   before fresh approval; no Runware generation or new integration.
+6. Reserve 16:00–16:30 BST for regression and rehearsal; present at 16:30.
 
-Both permitted paid Reactor travel tests have been used. One preliminary allocation
-also failed before world creation; it may be billable. No further autonomous travel
-starts. No fal jobs. Optional Runware is integrated through Modal, with generation
-disabled pending a key and explicit allowance; no image was generated. The core
-task reports 25 TypeScript and 12 backend tests passed, plus typecheck/build. Final
-headless desktop controls and spacing checks passed at 1280×720 and 1440×900.
-
-No new physics, Claude setup, accounts or databases. Preserve the existing release
-and known-good launcher. Remaining external actions are in SETUP_REMAINING.md.
+No new agents, Claude, desktop Computer Use, upgrades or scope expansion.

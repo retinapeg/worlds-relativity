@@ -10,7 +10,8 @@ access. React + TypeScript + Three.js; one small FastAPI token bridge.
 ./scripts/start-dev.sh
 ```
 
-Open http://127.0.0.1:5173. Backend health: http://127.0.0.1:8787/api/health.
+Open http://127.0.0.1:5173. Active backend health: http://127.0.0.1:5173/api/health.
+This workspace routes through the retained Modal bridge; 8787 is the optional local bridge.
 The script reuses already-running local servers; otherwise it starts both.
 It never installs packages or starts a paid world automatically.
 
@@ -63,7 +64,8 @@ The version-checked prepare script patches three vendor expressions to use HTTPS
 media signalling and its DNS route on localhost. It runs before dev/build and
 fails if the expected SDK source changes. No TLS validation is bypassed.
 The preserved C++ core has its own existing native/WASM test scripts.
-Actual results and browser evidence are recorded in QA.md and PROGRESS.md.
+The final gate and evidence are in QA.md and build/evidence/final-verification.json.
+HANDOFF.md is the consolidated current status.
 
 ## Protected Modal bridge
 
@@ -112,11 +114,14 @@ See MATH.md, PHYSICS.md, DEMO_FREEZE.md and HANDOFF.md before continuing work.
 
 ## Live verification status
 
-Two real Reactor travels were tested. The final world accepted a β=0 direction,
-reported it EXECUTED and confirmed remote travel completion on stop. Neither test
-produced playable video. Two required media origins were subsequently added to
-the candidate CSP; another paid test needs explicit approval because the two-test
-allowance is exhausted. The local simulation remains usable throughout.
+Two earlier real travels entered Reactor. The final β=0 direction was accepted
+and EXECUTED, and direct remote end returned completed. Neither test produced
+playable video. One preliminary readiness allocation also may be billable.
+All previous allowances are exhausted. The subsequent media-origin, playback and
+cleanup repairs have unpaid fixture validation only. **Live video is UNVERIFIED.**
+Runware is **BLOCKED** with no key, allowance or observed cached output. Keep the
+local simulation as the presentation baseline. The one proposed fresh live-test
+approval, duration/spending bounds and uncertainty are specified in HANDOFF.md.
 
 ## 75-second presentation sequence
 

@@ -6,6 +6,7 @@ import { LatestInstruction, WORLD_PROMPT, worldDirection } from './direction';
 import { createTokenResolver } from './token';
 import { endRemoteTravel, finishWithin, sendRemoteInstruction } from './endTravel';
 import { useRunwareArtwork } from '../runware/artwork';
+import { watchWorldVideo } from './media';
 
 function safeError(error: unknown) {
   const text = error instanceof Error ? error.message + (error.cause instanceof Error ? ` Cause: ${error.cause.message}` : '') : 'The provider could not complete this request.';
@@ -18,6 +19,8 @@ function World({ snapshot }: { snapshot: Snapshot }) {
   const apiRef = useRef(api); apiRef.current = api;
   const latest = useRef(snapshot); latest.current = snapshot;
   const video = useRef<HTMLVideoElement>(null);
+  const media = useRef<ReturnType<typeof watchWorldVideo> | null>(null);
+  const mediaElement = useRef<HTMLVideoElement | null>(null);
   const session = useRef<TravelSession | null>(null);
   const pendingTravel = useRef<Promise<TravelSession> | null>(null);
   const credentialsRef = useRef<TravelCredentialsMessage | null>(null);
@@ -31,6 +34,7 @@ function World({ snapshot }: { snapshot: Snapshot }) {
   const subscriptions = useRef<(() => void)[]>([]);
   const [step, setStep] = useState('idle'), [message, setMessage] = useState('');
   const [playing, setPlaying] = useState(false), [remaining, setRemaining] = useState(180);
+  const [playBlocked, setPlayBlocked] = useState(false);
   const [sent, setSent] = useState<{ key: string; text: string } | null>(null);
   const [instructionState, setInstructionState] = useState('Waiting for a live world');
   const [stopConfirmed, setStopConfirmed] = useState(false);
@@ -40,15 +44,30 @@ function World({ snapshot }: { snapshot: Snapshot }) {
 
   const stop = async (reason = 'stopped') => {
     if (closing.current) return;
+    const interruptedSetup = busy.current && !session.current;
     closing.current = true; generation.current++; busy.current = true;
     clearTimeout(timeout.current);
     clearTimeout(mediaTimeout.current);
+    media.current?.dispose(); media.current = null;
     queue.current?.close(); queue.current = null;
     subscriptions.current.forEach(unsubscribe => unsubscribe()); subscriptions.current = [];
     const active = session.current; session.current = null;
     const pending = pendingTravel.current;
-    video.current?.pause();
-    setPlaying(false); setStep('stopping');
+    // Late setup continuations and factories can still reach the shared SDK.
+    // Require a new runtime before reconnecting after interrupted setup.
+    if (interruptedSetup || pending) setNeedsReload(true);
+    // React clears DOM refs before passive unmount cleanup; retain the element we bound.
+    const attached = mediaElement.current ?? video.current;
+    mediaElement.current = null;
+    const detach = () => {
+      if (!attached) return;
+      attached.pause();
+      const stream = attached.srcObject;
+      attached.srcObject = null;
+      if (stream instanceof MediaStream) stream.getTracks().forEach(track => track.stop());
+    };
+    detach();
+    setPlaying(false); setPlayBlocked(false); setStep('stopping');
     try {
       const travelId = apiRef.current.travelState?.encrypted_travel_id;
       if (credentialsRef.current && travelId) {
@@ -69,7 +88,7 @@ function World({ snapshot }: { snapshot: Snapshot }) {
           try { await finishWithin((async () => { const { AliRtcEngine } = await import('aliyun-rtc-sdk'); await AliRtcEngine.getInstance().destroy(); })()); }
           catch { setNeedsReload(true); setMessage('Media cleanup needs a page reload before reconnecting.'); }
         }
-        if (pending) void pending.then(late => late.travel.end()).catch(() => {});
+        if (pending) void pending.then(late => { detach(); return late.travel.end(); }).catch(() => {});
         pendingTravel.current = null;
         credentialsRef.current = null;
         closing.current = false; busy.current = false; setStep(reason);
@@ -92,7 +111,7 @@ function World({ snapshot }: { snapshot: Snapshot }) {
     busy.current = true;
     const id = ++generation.current;
     const current = () => generation.current === id;
-    setMessage(''); setSent(null); setPlaying(false); setStep('authorising'); setStopConfirmed(false); setVideoEpoch(old => old + 1);
+    setMessage(''); setSent(null); setPlaying(false); setPlayBlocked(false); setStep('authorising'); setStopConfirmed(false); setVideoEpoch(old => old + 1);
     setInstructionState('Waiting for a live world'); setRemaining(180);
     token.current = createTokenResolver();
     timeout.current = setTimeout(() => { setMessage('World setup exceeded four minutes. Restart explicitly when ready.'); void stopRef.current('expired'); }, 240000);
@@ -120,6 +139,13 @@ function World({ snapshot }: { snapshot: Snapshot }) {
         setMessage('Media did not start within 60 seconds. The world is being stopped.');
         void stopRef.current('failed');
       }, 60000);
+      mediaElement.current = video.current;
+      media.current = watchWorldVideo(mediaElement.current!, {
+        playing: value => { if (current()) { setPlaying(value); if (value) clearTimeout(mediaTimeout.current); } },
+        blocked: value => { if (current()) setPlayBlocked(value); },
+        failed: text => { if (current()) { setMessage(text); void stopRef.current('failed'); } },
+        ended: () => { if (current()) void stopRef.current('completed'); },
+      });
       // The exported SDK factory makes one attempt. The high-level hook retries
       // three times, which would exceed the autonomous integration budget.
       pendingTravel.current = startTravel({ credentials, videoElement: video.current!, logLevel: 'none', streamReadyTimeout: 60000 });
@@ -129,10 +155,11 @@ function World({ snapshot }: { snapshot: Snapshot }) {
       session.current = active;
       subscriptions.current = [
         active.travel.on('statusChanged', status => {
+          if (!current()) return;
           setStep(status);
           if (status === 'completed' || status === 'failed') void stopRef.current(status);
         }),
-        active.travel.onError(error => { setMessage(safeError(error)); void stopRef.current('failed'); }),
+        active.travel.onError(error => { if (current()) { setMessage(safeError(error)); void stopRef.current('failed'); } }),
       ];
       setStep('travel connected');
       clearTimeout(timeout.current);
@@ -178,16 +205,11 @@ function World({ snapshot }: { snapshot: Snapshot }) {
     <div className="world-heading"><div><span className="eyebrow">02 / GENERATED WORLD</span><h2>The same journey. Imagined.</h2></div>
       <span className={`world-status ${playing ? 'live' : ''}`} data-testid="world-status">{playing ? 'VIDEO PLAYING' : step.toUpperCase()}</span></div>
     <div className="world-screen">
-      <video key={videoEpoch} ref={video} poster={artwork.url || undefined} autoPlay muted playsInline
-        onVolumeChange={event => { if (!event.currentTarget.muted) event.currentTarget.muted = true; }}
-        onLoadedMetadata={event => { if (!event.currentTarget.muted) event.currentTarget.muted = true; }} onPlaying={event => {
-        if (event.currentTarget === video.current && !closing.current && (session.current || pendingTravel.current)) {
-          clearTimeout(mediaTimeout.current); setPlaying(true);
-        }
-      }} onWaiting={() => setPlaying(false)} onEnded={() => { if (session.current) void stopRef.current('completed'); }} aria-label="Live HappyOyster world video" />
+      <video key={videoEpoch} ref={video} poster={artwork.url || undefined} autoPlay muted playsInline aria-label="Live HappyOyster world video" />
       {!playing && <div className="world-placeholder"><div className="window-symbol" aria-hidden="true">✦</div>
         <h3>{active ? 'Opening a window to the world…' : 'One cockpit. An evolving sky.'}</h3>
         <p>{active ? `${api.phase} · world ${api.worldState?.phase ?? 'not created'}` : 'Start a live Reactor world, then change speed to direct its artistic impression.'}</p>
+        {playBlocked && <button onClick={() => { void media.current?.play(); }}>Play video</button>}
         {!active && <span>{artwork.image ? 'RUNWARE STARTING FRAME · HAPPYOYSTER DIRECTING' : 'HAPPYOYSTER · DIRECTING MODE'}</span>}</div>}
       {playing && <span className="world-countdown">{remaining}s remaining</span>}
     </div>

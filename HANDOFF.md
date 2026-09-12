@@ -1,107 +1,117 @@
-# Worlds — implementation handoff
+# Worlds — controlled final handoff
 
-Checkpoint: 12 September 2026, 13:28 BST. Local physics works. Reactor authentication,
-world creation, instruction acceptance/execution and explicit remote stop were verified;
-playable world video was **not** verified. Both authorised travel tests are exhausted.
+12 September 2026. The deterministic local demo is the presentation baseline.
+**Live Reactor video remains UNVERIFIED. All previous paid allowances are exhausted.**
+No new live allocation or generation is included in this finalisation.
 
-## Run and protect the demo
+## Ownership and local checkpoints
 
-- `./scripts/start-dev.sh` starts/reuses the frontend (5173) and protected FastAPI
-  bridge (8787). Both are running at this checkpoint.
-- `./scripts/npm.sh run preview -- --port 4174` serves the tested production candidate.
-- `./run_demo.sh --known-good` serves the preserved offline snapshot on 4173.
-  Never edit `releases/20260912T110958Z`, its source, permissions or pointer.
-- Read MATH.md and DEMO_FREEZE.md before changes. Feature freeze by 16:00 BST;
-  presentation target 16:30, absolute handoff 17:00.
+Only the two existing owners are retained: **Build Relativity Drive demo** owns
+the scoped Reactor repair; **Implement relativity hackathon MVP** coordinates
+verification, evidence, documents and final commits. Integration writes stop before
+the final checkpoint/gate. The duplicate **Configure bounded multi-agent use** is
+idle. Actual task state is checked again for the final report. No new agents or Claude.
 
-## Module boundaries
+Recoverable baseline: `7078adaad74e78ae2783c63f8bb34b3ae90b00da` on `main`.
+The final reviewed source is the subsequent ordinary local commit shown by
+`git rev-parse HEAD`. Its exact hash, actual results, times and artifact names are
+recorded in `build/evidence/final-verification.json`. Browser runners record the
+revision and require a clean worktree. A receipt is valid only if its revision
+matches HEAD and all required checks passed. No push, amend, reset or clean.
 
-| Area | Files | Responsibility |
+## Run and protect
+
+- Start: `./scripts/start-dev.sh`; open http://127.0.0.1:5173.
+- The running frontend routes through the retained Modal bridge via server-side
+  `REACTOR_BACKEND_URL`. The optional local 8787 bridge was not running at the
+  finalisation inspection. The start script can start it and reuses the frontend.
+- Existing production preview: http://127.0.0.1:4174. If needed, start with
+  `./scripts/npm.sh run preview -- --port 4174`.
+- Fallback: `./run_demo.sh --known-good`, normally port 4173. No rebuilding or
+  downloads. Never alter `releases/20260912T110958Z`, its source, permissions or
+  pointer. This is the earlier 0–0.999 version; the current candidate uses 0–0.99.
+- Build only into `build/relativity-candidate`. Read MATH.md and DEMO_FREEZE.md.
+- Reserve **16:00–16:30 BST** for regression/rehearsal; present at 16:30. No features
+  or dependency changes during that window.
+
+## Unpaid media repair
+
+The actual component requires nonzero dimensions and advancing decoded frames;
+a poster, connected session or playing event is insufficient. Playback is muted.
+Autoplay rejection exposes **Play video** on the same session. Decode errors,
+60 seconds without media arrival and ten seconds without advancing frames stop
+the world with readable errors. Unfinished setup/factory cancellation or uncertain
+teardown requires a reload before reconnecting, preventing late setup from
+interfering with a new session.
+
+Stop/unmount detaches the retained element, stops its tracks, closes the direction
+queue, cancels timers/listeners and ignores stale callbacks. Direct temporary-token
+`/travels/end` acknowledgement is separate from bounded SDK disconnect and RTC
+destruction. Late completion retains cleanup. SDK resolution is not an independent
+billing receipt. The one-attempt factory and server session limits are unchanged.
+
+The isolated test server substitutes SDK modules around the real ReactorPanel.
+Its explicitly labelled synthetic moving stream exercises actual browser playback
+and cleanup without a provider allocation. It is outside the production entry.
+**These fixtures do not verify Reactor media transport.** Exact executed results
+belong in the final receipt described in QA.md.
+
+## Sponsor status
+
+| Service | Status | Evidence and boundary |
 | --- | --- | --- |
-| Physics | `src/physics/relativity.ts`, `photon.glsl.ts`, `beacons.ts` | One SR state, ray transforms and stationary lab beacons |
-| Motion | `src/controls/simulation.ts`, `frameClock.ts` | Incremental clocks/position; manual constant-speed segments; prescribed tour ramps |
-| Display | `src/ui/App.tsx`, `Minkowski.tsx`, `Wavelength.tsx`, `style.css` | β 0–0.99, equal-scale lab worldlines, simultaneous ruler, frequency/wavelength indicators |
-| Generated world | `src/reactor/ReactorPanel.tsx`, `src/reactor/` | Separate SDK video, deterministic directions, latest-only queue and lifecycle |
-| Backend | `backend/app.py`, `backend/modal_app.py` | Protected scoped JWT exchange/cache; same CPU app on Modal |
-| Compatibility | `vite.config.ts`, `scripts/prepare-reactor-sdk.mjs`, `index.html` | SDK WASM assets, three version-checked RTC HTTPS/DNS fixes, narrow media CSP |
+| Modal | **LIVE** | Retained CPU bridge and local proxy return health 200; proxy reports Modal hosting. Prior protected token exchange worked. No redeployment this pass. |
+| Reactor control/auth | **LIVE — previously verified** | Two earlier worlds entered travel. Final β=0 direction was accepted and timeline EXECUTED; direct end returned completed. Historical evidence, not a final-revision live retest. |
+| Reactor video | **UNVERIFIED** | Neither earlier travel produced playable video. Media-origin and playback repairs have unpaid validation only. |
+| Runware | **BLOCKED** | No key or allowance. Status ready:false / attempted:false. No generated or cached image observed. Adapter/cache code is not successful sponsor usage. |
 
-The single-attempt exported `startTravel` factory is intentional: the higher-level
-SDK hook automatically retries and could exceed the paid-session budget. Its video
-timeout does not cover a stalled RTC join. Direct documented `/travels/end` and
-`/instruct` requests use temporary credentials independently. Only `accepted:true`
-counts as instruction acceptance; the provider timeline is displayed separately.
-Stop requests an explicit remote acknowledgement, then disconnects/releases local
-resources. A late RTC promise remains attached for cleanup without blocking the UI
-forever. Local Aliyun teardown can require a page reload; the UI says so.
+An earlier preliminary allocation failed readiness before world creation; count it
+as potentially billable in addition to the two travels. First-travel SDK cleanup
+had no observed explicit remote acknowledgement; its 300-second cap elapsed before
+the second. No fresh world, Runware generation, FAL job, frontend publication or
+provider switch occurred in this pass.
 
-## Actual provider result and remaining blocker
+## One decision after the unpaid gate
 
-Two real worlds entered travel. In the final test, the direction from β=0 was
-accepted and appeared as **EXECUTED** on the provider timeline. The direct end
-response reported **completed**. Video never became playable. The first test
-attempted SDK termination, but an explicit remote acknowledgement was not observed;
-its 300-second session cap elapsed before the final test. One preliminary Reactor
-allocation also failed readiness before world creation; treat it as potentially billable.
+Request approval for **one attempted allocation total, including failure**:
+observe actual received video dimensions and advancing visible frames; change β
+from 0 to 0.6; record accepted/timeline direction and describe any visible response
+honestly; then confirm direct remote end and local media cleanup. No second
+allocation or automatic retry.
 
-The final trace identified two blocked required media origins. The candidate now
-allows exactly `https://r5-rtcpub.media-sh.alivecdn.com` and
-`https://r5-rtcsub.media-sh.alivecdn.com`. This fix passed build/local browser checks
-but has **not** had another live travel test. Optional SDK telemetry stays blocked.
-Do not claim that live video works and do not start another paid world without a
-new explicit allowance. See SETUP_REMAINING.md.
+Use the existing **300-second provider-enforced session cap**. The client stops
+travel within 180 seconds of receiving travel credentials, earlier on success or
+media failure. Cleanup requests direct end, bounded disconnect and RTC destruction.
+Record any unconfirmed stage; the server cap is a fallback, not a billing receipt.
 
-## Credentials and deployment
+Proposed usage budget: **US$5**. The 12 September public director rate is
+US$0.0139/second (US$0.834/minute), or **US$4.17 for 300 seconds**. Recheck pricing
+before an approved attempt and abort if the maximum exceeds that budget. Duration
+is enforceable; **this flow has no provider-enforced dollar cap**. GPU-ready idle
+time can be billed without video; failed-allocation billing, taxes and invoice
+totals remain uncertain. No top-up or billing setting change is authorised.
+Sources: https://www.reactor.inc/models/happy-oyster/info,
+https://docs.reactor.inc/resources/billing,
+https://docs.reactor.inc/resources/rate-limits.
 
-Ignored `.env.server` is mode 0600. Primary Reactor key works; previous key was never
-used. FAL is reserved and unused. No browser/VITE secrets. Python 3.13/OpenSSL in
-`.venv` replaces the system Python's incompatible LibreSSL TLS client.
+## Verification, security and presentation
 
-Modal bridge: https://retinapeg--worlds-relativity-bridge-web.modal.run
-Health 200, anonymous POST 403 and protected scoped token exchange 200/no-store
-were verified. Default Vite routing now uses Modal via the server-side
-`REACTOR_BACKEND_URL`; clear it and restart Vite to use local8787 instead.
-Tokens allow the director model, one session and at most 300 seconds per session.
-No fal generation, Claude setup, Git push or frontend publication occurred.
+QA.md defines the single final gate and receipt: TypeScript physics/lifecycle,
+Python backend, preserved native/WASM numerics, browser GPU comparisons, real UI
+smoke, complete provider-blocked tour, and separate synthetic Reactor preflight.
+Expected offline Runware request errors remain visible in evidence. Do not merge
+historical counts into a claim about final HEAD.
 
-Final verification update13:36 BST: the rebuilt production candidate passed the
-headless smoke. A full66-secondtour with provider access blocked finished at
-lab66.000000 s / traveller35.755318 s and stopped at rest. No uncaught errors;
-one expected blocked Runware status request. Evidence is in QA.md and build/evidence.
+Credentials remain server-side in ignored `.env.server` (0600) and the retained
+Modal secret. Primary credentials worked earlier; previous credentials and FAL
+remain unused. No browser/VITE secrets. Staged source and rebuilt candidate are
+scanned without printing secrets; snapshot runtime/source hashes are checked.
+Headless Chrome uses an isolated profile. No desktop Computer Use or macOS changes.
 
-## Verification and repository state
+The prior SDK audit reported 3 high / 1 moderate issues; no new audit or upgrades
+are claimed. Record build-size/deprecation warnings in the final receipt. Other
+presentation hardware and browsers remain untested.
 
-Final integrated build: 25 TypeScript tests, typecheck, production build and 12 backend
-tests passed, including Runware guards and a bounded SDK-cleanup regression.
-Actual production browser checks passed: 0.6/0.99 presets; Run/Pause/Reset;
-105.603500 s lab / 84.482800 s proper at 0.6c; 483 GPU photon rays with maximum
-relative-scaled error 2.6e-7; no warning/error logs after local interactions.
-All five presets and mixed-speed incremental history also passed in development.
-
-The unchanged original core previously passed 34,739 sanitizer checks and the same
-34,739 WASM checks. All 57 frozen runtime/export hashes and 49 frozen source hashes
-match. Main has an unborn HEAD, no commit and no remote; all original work remains.
-
-Vite reports large bundles. The SDK dependency audit reports 3 high / 1 moderate
-issues without an available automatic upstream fix; no speculative upgrades made.
-Earlier checks used in-app Chromium. Final layout/control verification also passed
-in headless Chrome at1280×720 and1440×900, with no uncaught errors or overlaps among
-the main panels. No native UI control or macOS permission changes are needed.
-
-## Ownership transfer and next task
-
-Exactly two active implementation agents are allowed. “Build Relativity Drive demo”
-owns physics, shared state, src/reactor, src/runware, backend/config and final integration.
-This task owns src/ui, browser verification and demo/handoff documents. No children
-or replacements. Runware is wired and its12backend tests pass with generation disabled:
-no key and allowance0. Headless UI confirmed the truthful missing-key status. No image
-or live starting-frame integration has been verified. Coordinate changes with the
-core task; do not run overlapping implementations or paid tests. The final core
-patch bounds SDK disconnect and RTC destruction to five seconds each and requires
-reload after uncertain teardown. Video is re-muted on metadata/volume changes.
-These defensive fixes are unit/build checked but have not had another paid travel.
-
-Best bounded Claude task, if the user chooses to launch it: after explicit approval
-for one additional short travel test, verify actual video frames after the two-origin
-CSP repair, change β from 0 to 0.6, confirm accepted/executed direction, then confirm
-remote stop and local cleanup. Preserve the physics and frozen release. Claude was
-not launched or configured by this task.
+Use the **75-second README sequence**. Until live video is verified, show the AI
+limitation/status without starting a provider world. Local MVP ready; further
+features deferred.
