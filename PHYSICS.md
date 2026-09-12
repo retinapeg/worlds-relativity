@@ -74,13 +74,13 @@ clock totals, positions and segment endpoints. The revised 54-second tour reache
 0.6c after 1 second, 0.99c at 6 seconds and 0.999c at 16 seconds, each with its
 0.8-second prescribed transition. It then shows side (29 s), rear (34 s), forward
 (40 s), optical baseline (44 s) and transformed optics again (48 s), finishing
-paused at 0.999c at 54 seconds. Manual speed, view or baseline control interrupts
-the automated sequence. A visibility boundary resets the
+paused at 0.999c at 54 seconds. Manual speed or view control interrupts the automated sequence. Optical
+baseline changes preserve the entire continuing trajectory, including ramps. A visibility boundary resets the
 wall-clock timestamp. Long hidden intervals do not advance this educational timeline.
 
 The final cinematic burst uses the same ramp integrator and accumulators. Its
-canonical programme time is 0–6.5 lab seconds: 0–1 slow introduction (from rest,
-gently approach 0.1c), 1–2 rapidity ramp to 0.999c, 2–5 high-speed hold, 5–6.5
+canonical programme time is 0–6 lab seconds: 0–1 slow introduction (from rest,
+gently approach 0.1c), 1–2 rapidity ramp to 0.999c, 2–5 high-speed hold, 5–6
 rapidity ramp to 0.1c. A start above 0.2c first brakes over 0.6 seconds, represented
 as negative programme time. All times schedule the same lab timestep; position
 and clocks never reset. Manual speed input cancels, pause freezes, reset clears,
@@ -124,14 +124,22 @@ segments retain their endpoints; tour ramps retain samples. x and ct share one
 scale so a light ray is 45 degrees. Hidden-tab intervals are omitted from the
 educational timeline rather than producing a jump on return.
 
-The current fly-through replaces periodic beacons with fixed world geometry:
-double polygon gates every 0.45 light-seconds, a gridded side truss/floor rails and
-eight tilted box frames. All distances use light-seconds, with c = 1 light-second
-per lab second. The course spans x = −1.8 to 72 light-seconds; objects are never
-recycled or teleported. This finite extent eventually ends during a long flight.
-The separate 100 m ruler is not a scale model of this course.
+The corrected course uses fixed, asymmetric lab geometry: Gate A at x=0.8 ls
+has twin extended uprights; offset Gate B at x=2.2 ls has long crossbars. Both
+have finite depth and repeated geometric ribs. A large side truss spans x=0.5
+through 2.5 ls; pylons stand at different heights and lateral positions. The
+first tower centre is about 32 degrees off the initial +X direction. These
+structures recur only in predetermined districts 6 ls apart over a finite
+72 ls layout. They never move, recycle, or reset around the observer.
 
-Each edge is subdivided into at most 0.025-light-second segments. The GPU subtracts
+The coast covers 2.997 ls in three lab seconds. Close gate edges were chosen
+so even their aberrated directions can sweep out of the forward field during
+that coast. A source can remain optically ahead after its lab x coordinate has
+been passed: strong forward aberration is preserved. No angle enlargement,
+velocity-dependent FOV, global zoom, or compensating scale is applied. The
+100 m ruler remains a separate simultaneous-measurement model.
+
+Each edge is subdivided into at most 0.006-light-second segments. The GPU subtracts
 the current observer x, normalizes the source ray, applies the shared verified
 photon kernel once and then camera projection. No additional 1/gamma scaling is
 applied. Stationary continuously emissive objects have fixed emission positions,

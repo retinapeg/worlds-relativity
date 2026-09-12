@@ -68,13 +68,13 @@ export class Simulation {
     else if (burst.phase === 'BRAKING') { burst.phase = 'COASTING'; burst.slowHold = true; burst.duration = 1; burst.time = 0; }
     else if (burst.slowHold) { burst.phase = 'ACCELERATING'; burst.slowHold = false; burst.duration = 1; this.setVelocity(MAX_BETA, false, 1); }
     else if (burst.phase === 'ACCELERATING') { burst.phase = 'COASTING'; burst.duration = 3; }
-    else { burst.phase = 'BRAKING'; burst.finalBrake = true; burst.duration = 1.5; this.setVelocity(BURST_BASELINE, false, 1.5); }
+    else { burst.phase = 'BRAKING'; burst.finalBrake = true; burst.duration = 1; this.setVelocity(BURST_BASELINE, false, 1); }
   }
   setLook(yaw: number, pitch = 0) {
     this.stopDemo();
     this.input.lookYaw = finite(yaw); this.input.lookPitch = finite(pitch);
   }
-  setOpticalBaseline(enabled: boolean) { this.stopDemo(); this.opticalBaseline = enabled; }
+  setOpticalBaseline(enabled: boolean) { this.opticalBaseline = enabled; }
   private record() {
     const last = this.history[this.history.length - 1];
     if (last.t !== this.clocks.lab) this.history.push({ t: this.clocks.lab, x: this.clocks.position });

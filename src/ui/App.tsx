@@ -132,12 +132,13 @@ export function App() {
       <button className="experience-button burst-button" onClick={burst} disabled={!!error}>ENGAGE RELATIVITY <span>SPACE ↗</span></button>
       <p className="burst-status"><strong data-testid="burst-phase" data-phase={snapshot.burstPhase ?? ''} data-burst-time={snapshot.burstTime ?? ''}>{snapshot.burstPhase ?? (snapshot.running ? 'CRUISING' : 'READY TO FLY')}</strong><span>illustrative acceleration profile</span></p>
       <button className="instant-experience" onClick={experience} disabled={!!error}>Experience 99.9% of light speed instantly</button>
-      <p className="subtitle">Lab distance <output data-testid="distance" data-position={snapshot.position}>{snapshot.position.toFixed(2)}</output> light-seconds · gates every 0.45 ls</p>
+      <p className="subtitle">Lab distance <output data-testid="distance" data-position={snapshot.position}>{snapshot.position.toFixed(2)}</output> light-seconds · stationary lab structures</p>
       <div className="doppler"><span>AHEAD · APPROACH <b data-testid="doppler-forward">{snapshot.approach.toFixed(2)}×</b><Wavelength doppler={snapshot.approach} /></span>
         <span>BEHIND · RECEDE <b data-testid="doppler-rear">{snapshot.recede.toFixed(3)}×</b><Wavelength doppler={snapshot.recede} /></span></div>
       <small className="frequency-note">Observed / emitted frequency · illustrative colour</small>
     </section>
 
+    {snapshot.beta > 0.998 && <p className="aberration-note" data-testid="aberration-note">Forward objects may appear angularly compressed by relativistic aberration.<br />Distance is still closing at {snapshot.beta.toFixed(3)}c.</p>}
     <div className="physics-view-title"><strong>PHYSICS SIMULATION</strong><span>deterministic special relativity</span></div>
     <aside className="journey-clocks" aria-label="Accumulated journey clocks"><Clock seconds={snapshot.lab} label="LAB CLOCK" kind="lab" />
       <Clock seconds={snapshot.proper} label="SHIP CLOCK" kind="proper" /></aside>
@@ -202,9 +203,9 @@ export function App() {
         <label><input type="checkbox" checked={beacons} onChange={e => { setBeacons(e.target.checked); settings.current.beacons = e.target.checked; }} /> Stationary gates and gridded flight course</label>
         <p>Velocity is along lab +X. Rays point toward sources. The shader applies the photon boost once; camera rotation changes only your view.</p>
         <p>Stellar colour uses three blackbody samples with T′ = D·T. Brightness is compressed for visibility. The nebula tint is illustrative. No exact eye rendering or photometry.</p>
-        <p>The fixed course contains polygonal gates 0.45 light-seconds apart, a gridded side truss and tilted boxes. Your position follows dx/dt = βc with c = 1 light-second per lab second. Each sampled edge point supplies a ray from your current position; the photon transform runs once, followed by camera projection. No extra length squeeze is applied.</p>
+        <p>The fixed lab course contains offset gates at 0.8 and 2.2 light-seconds, a station truss and off-axis towers, with repeated geometric markings. Your position follows dx/dt = βc with c = 1 light-second per lab second. Each sampled edge point supplies a ray from your current position; the photon transform runs once, followed by camera projection. No extra length squeeze is applied.</p>
         <p>Course structures are stationary emitters, so their emission positions do not move during light travel. Thin sampled wires, finite course extent, illustrative exposure and false colour simplify the image. This is not exact photographic rendering of moving objects.</p>
-        <p>SPACE launches a short burst: accelerate, coast at 0.999c, then brake to 0.2c. If already fast, it brakes first. This is illustrative acceleration prescribed in rapidity, not propulsion dynamics. Clocks integrate the same velocity history used for translation. Manual speed changes cancel the burst; pause freezes it. The optional tour also uses prescribed transitions. Local clocks suspend while this tab is hidden.</p>
+        <p>SPACE launches a six-second burst: 1 s slow approach, 1 s acceleration, 3 s coast at 0.999c, then 1 s braking to 0.1c. If already fast, it brakes first. This is illustrative acceleration prescribed in rapidity, not propulsion dynamics. Clocks integrate the same velocity history used for translation. Manual speed changes cancel the burst; pause freezes it. The optional tour also uses prescribed transitions. Local clocks suspend while this tab is hidden.</p>
         <p>Optional angular reference rings mark catalogue sky angles. The separate craft silhouette measures a 100 m craft at simultaneous lab times, not its optical image. We never squeeze the starfield to imitate length contraction.</p>
         <p>The optical baseline turns off the photon transform using the same camera, source positions and current lab position. It never resets or changes the journey clocks or measured ship length. False colours saturate at ¼× / 4× for readability; numerical wavelengths stay unclamped.</p>
         <Minkowski history={simulation.history} t={snapshot.lab} x={snapshot.position} />

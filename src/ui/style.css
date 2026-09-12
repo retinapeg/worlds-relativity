@@ -1492,3 +1492,6 @@ summary span {
 }
 .cinematic-layout .sponsor-provenance { display:grid; gap:3px; }
 .cinematic-layout:has(.world-status.live) .world-heading h2 { display:block; font-size:18px; }
+
+.cinematic-layout .aberration-note { position:absolute; top:94px; left:50%; transform:translateX(-50%); max-width:390px; margin:0; padding:6px 10px; font-size:10px; line-height:1.5; text-align:center; color:#b9cddd; background:#06101b88; border-radius:5px; pointer-events:none; }
+.cinematic-layout:has(.world-status.live) .aberration-note { left:27.5%; max-width:32%; }

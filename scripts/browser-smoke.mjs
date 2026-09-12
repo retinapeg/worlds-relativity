@@ -166,18 +166,41 @@ try {
   await page.getByTestId('optical-baseline').click();
   check('Same-camera optical baseline changes pixels without changing clocks or exact measurements');
 
-  for (const manual of ['preset', 'slider', 'camera', 'baseline']) {
+  for (const manual of ['preset', 'slider', 'camera']) {
     await page.getByRole('button', { name:/54-second/ }).click();
     await page.waitForFunction(() => Number(document.querySelector('[data-testid="lab-time"]').dataset.seconds) > 1.1);
     if (manual === 'preset') await page.getByRole('button', { name:'0.999c', exact:true }).click();
     if (manual === 'slider') { await throttle.focus(); await throttle.press('End'); }
     if (manual === 'camera') await page.getByRole('button', { name:'Rear', exact:true }).click();
-    if (manual === 'baseline') await page.getByTestId('optical-baseline').click();
     await page.getByRole('button', { name:/54-second/ }).waitFor();
     await page.locator('#run-pause').click();
     assert.equal(await page.locator('.tour-progress').count(), 0);
   }
-  check('Preset, slider, camera and baseline each take control away from the automated tour');
+  check('Preset, slider and camera each take control away from the automated tour');
+  await page.getByRole('button',{name:/54-second/}).click();
+  await page.waitForFunction(()=>Number(document.querySelector('[data-testid="lab-time"]').dataset.seconds)>1.1);
+  await page.locator('#run-pause').click();
+  const tourState=()=>page.evaluate(()=>{
+    const get=id=>document.querySelector(`[data-testid="${id}"]`);
+    return {beta:Number(get('beta').dataset.beta),target:get('target-beta').textContent,
+      lab:Number(get('lab-time').dataset.seconds),proper:Number(get('proper-time').dataset.seconds),
+      position:Number(get('distance').dataset.position),view:get('view-label').textContent};
+  });
+  const tourBefore=await tourState();
+  await page.getByTestId('optical-baseline').click();await painted(page);
+  assert.deepEqual(await tourState(),tourBefore,'baseline preserves paused tour state');
+  assert.equal(await page.locator('.tour-progress').count(),1,'baseline must not cancel the tour');
+  await page.getByRole('button',{name:/Stop demo/}).waitFor();
+  await page.getByTestId('optical-baseline').click();
+  assert.deepEqual(await tourState(),tourBefore,'restoring optics preserves the tour');
+  await page.locator('#run-pause').click();
+  await page.waitForFunction(previous=>Number(document.querySelector('[data-testid="lab-time"]').dataset.seconds)>previous+.3,tourBefore.lab);
+  await page.locator('#run-pause').click();const tourAfter=await tourState();
+  assert.ok(tourAfter.lab>tourBefore.lab&&tourAfter.proper>tourBefore.proper&&tourAfter.position>tourBefore.position);
+  assert.ok(tourAfter.beta>=tourBefore.beta&&tourAfter.beta<=.6000001);
+  assert.equal(await page.locator('.tour-progress').count(),1);
+  await page.getByRole('button',{name:/Stop demo/}).click();
+  check('Optical comparison preserves the automated tour and continuing trajectory',{tourBefore,tourAfter});
   await page.getByRole('button', { name: 'Rear', exact: true }).click();
   await page.getByRole('button', { name: /Reset/ }).click();
   for (const id of ['beta', 'distance']) near(await number(page, id), 0, 0, `reset ${id}`);

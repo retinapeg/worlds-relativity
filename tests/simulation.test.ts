@@ -86,7 +86,7 @@ it('preserves the actual 18-second proper-time history across manual speed chang
 });
 it('shows contraction within five seconds and lets each manual control interrupt the tour', () => {
   for (const manual of [(s: Simulation) => s.setVelocity(0.999),
-    (s: Simulation) => s.setLook(Math.PI), (s: Simulation) => s.setOpticalBaseline(true)]) {
+    (s: Simulation) => s.setLook(Math.PI)]) {
     const s = new Simulation(); s.startDemo(); s.advance(5);
     expect(s.snapshot().beta).toBeCloseTo(0.6, 12);
     const history = { ...s.clocks };
@@ -128,9 +128,9 @@ it('bursts continuously from rest, coasts, brakes and keeps flying at low speed'
   s.advance(3);
   expect(s.clocks.position - position).toBeCloseTo(3 * 0.999, 12);
   expect(s.snapshot().burstPhase).toBe('BRAKING');
-  s.advance(0.75);
+  s.advance(0.5);
   expect(s.eta).toBeCloseTo((Math.atanh(0.999) + Math.atanh(BURST_BASELINE)) / 2, 12);
-  s.advance(0.75);
+  s.advance(0.5);
   expect(s.snapshot()).toMatchObject({ burstPhase: null, burstTime: null, transitioning: false, running: true });
   expect(s.snapshot().beta).toBeCloseTo(BURST_BASELINE, 12);
   const recovery = { ...s.clocks };
@@ -155,20 +155,20 @@ it('brakes before a new burst at .999 without resetting the journey or repeating
   expect(s.snapshot().burstPhase).toBe('COASTING');
   expect(s.snapshot().beta).toBeCloseTo(0.999, 12);
   expect(s.snapshot().burstTime).toBeCloseTo(2, 12);
-  s.advance(4.5);
+  s.advance(4);
   expect(s.snapshot().burstPhase).toBeNull();
   s.advance(20);
   expect(s.snapshot().beta).toBeCloseTo(BURST_BASELINE, 12);
-  expect(s.clocks.lab).toBeCloseTo(before.lab + 27.1, 10);
+  expect(s.clocks.lab).toBeCloseTo(before.lab + 26.6, 10);
   expect(s.clocks.position).toBeGreaterThan(before.position);
 });
 
 it('integrates each finite burst identically across frame rates and long frames', () => {
-  // Independent analytic totals for the new 6.5 s programme: low introduction,
-  // 1 s ramp, 3 s high hold, 1.5 s braking; high starts add .6 s pre-braking.
+  // Independent analytic totals for the new 6 s programme: low introduction,
+  // 1 s ramp, 3 s high hold, 1 s braking; high starts add .6 s pre-braking.
   for (const [initial, proper, position] of [
-    [0, 5.578396376885021, 5.493463090229079],
-    [0.999, 5.209301036876013, 5.986510413338752],
+    [0, 5.883193402095822, 5.124187217109926],
+    [0.999, 5.5140980620868145, 5.617234540219598],
   ]) {
     for (const hz of [0.1, 30, 60, 144]) {
       const s = new Simulation(); s.setVelocity(initial); s.startBurst();
@@ -216,4 +216,26 @@ it('camera and optical baseline compare the same continuing burst flight', () =>
   expect(a.clocks).toEqual(b.clocks);
   expect(a.eta).toBe(b.eta);
   expect(a.snapshot().burstPhase).toBe(b.snapshot().burstPhase);
+});
+
+
+it('records .999 ls per lab second at t0, +0.5, +1 and +2 seconds without resetting position', () => {
+  const s=new Simulation(); s.setVelocity(.6); s.advance(5);
+  const initial={...s.clocks}; s.setVelocity(.999);
+  expect(s.clocks).toEqual(initial);
+  const records=[{dt:0,position:s.clocks.position}];
+  for (const dt of [.5,.5,1]) { s.advance(dt); records.push({dt:s.clocks.lab-initial.lab,position:s.clocks.position}); }
+  for (const sample of records) expect(sample.position).toBeCloseTo(initial.position+.999*sample.dt,12);
+  expect(records.map(p=>p.dt)).toEqual([0,.5,1,2]);
+  const before={...s.clocks}; s.startBurst(); expect(s.clocks).toEqual(before);
+  s.setVelocity(.1); expect(s.clocks).toEqual(before);
+});
+
+it('the optical-only baseline preserves the entire continuing tour, including a velocity ramp', () => {
+  const a=new Simulation(), b=new Simulation(); a.startDemo(); b.startDemo(); a.advance(1.3); b.advance(1.3);
+  const before=a.snapshot(); a.setOpticalBaseline(true);
+  expect(a.snapshot()).toEqual({...before,opticalBaseline:true});
+  a.advance(2); b.advance(2);
+  expect(a.clocks).toEqual(b.clocks); expect(a.eta).toBe(b.eta);
+  expect(a.demoTime).toBe(b.demoTime);
 });

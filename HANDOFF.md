@@ -1,5 +1,24 @@
 # Worlds — controlled final handoff
 
+## Current physics / visual correction — 12 September 2026
+
+The user's latest explicit correction authorises only a fixed asymmetric finite
+course, six-second burst choreography, an optical-only baseline, a subtle
+aberration explanation and direct motion verification. It supersedes the older
+course/timing freeze for this repair. Preserve all established SR equations,
+photon shaders, camera FOV, source snapshots and prior candidate outputs.
+Position remains the single integral dx/dt_lab = beta (light-seconds/second).
+The burst is 1 s slow approach, 1 s ramp, 3 s at 0.999c and 1 s braking.
+Presets and burst never reset position. Only explicit Reset does so.
+
+Original core task owns source/tests/docs for this repair; only the existing
+second/demo task 01a09533-734f-7781-871e-fb1a4854fbf0 handles browser scripts and
+evidence. No new agents, recursive delegation, dependencies or provider calls.
+Build separately into build/relativity-passage-candidate (port 4177); retain
+build/relativity-cinematic-candidate (4176) and every older protected snapshot.
+Evidence lives under build/evidence/course-passage. Stop after verification.
+
+
 Final sponsor result at16:25 BST: the single approved Runware still request
 (runware:101@1 / FLUX.1 dev) was rejected with provider HTTP400. No image or
 reported cost was returned; no retry was made. The attempted marker prevents
