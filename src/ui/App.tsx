@@ -25,7 +25,7 @@ function Clock({ seconds, label, kind }: { seconds: number; label: string; kind:
   </div>;
 }
 export function App() {
-  const simulation = useRef(new Simulation(false)).current;
+  const [simulation] = useState(() => { const flight = new Simulation(true); flight.setVelocity(0.1); return flight; });
   const canvas = useRef<HTMLCanvasElement>(null);
   const settings = useRef({ spectral: false, guides: false, beacons: true });
   const [snapshot, setSnapshot] = useState(simulation.snapshot());
@@ -35,6 +35,7 @@ export function App() {
   const [beacons, setBeacons] = useState(true);
   const [hidden, setHidden] = useState(document.hidden);
   const [modal, setModal] = useState('checking');
+  const [explain, setExplain] = useState(false);
   const view = viewName(snapshot.lookYaw, snapshot.lookPitch);
   const refresh = () => setSnapshot(simulation.snapshot());
 
@@ -59,8 +60,10 @@ export function App() {
     const visibility = () => { frameClock.suspend(); setHidden(document.hidden); };
     const lost = (event: Event) => { event.preventDefault(); cancelAnimationFrame(request); fail('The graphics context was lost. Reload to recover the local scene.'); };
     const resize = () => renderer?.resize();
+    const resizeObserver = new ResizeObserver(resize);
     try {
       renderer = new RelativityRenderer(surface, createProceduralSource());
+      resizeObserver.observe(surface);
       setGpu(renderer.gpuCheck); setReady(true);
       disposeInput = attachDesktop(surface, simulation, refresh);
       const frame = (now: number) => {
@@ -85,7 +88,7 @@ export function App() {
     window.addEventListener('resize', resize); document.addEventListener('visibilitychange', visibility);
     surface.addEventListener('webglcontextlost', lost);
     return () => {
-      cancelAnimationFrame(request); disposeInput(); renderer?.dispose();
+      cancelAnimationFrame(request); resizeObserver.disconnect(); disposeInput(); renderer?.dispose();
       window.removeEventListener('resize', resize); document.removeEventListener('visibilitychange', visibility);
       surface.removeEventListener('webglcontextlost', lost);
     };
@@ -105,8 +108,9 @@ export function App() {
     snapshot.beta < 0.98 ? 'The sky gathers ahead.' : snapshot.beta < 0.998 ? 'Approaching the limit.' : 'Almost light.';
   const fill = snapshot.target / MAX_BETA * 100;
   const tour = snapshot.demoTime !== null;
+  const moment = snapshot.burstTime !== null && snapshot.burstTime >= 2 && snapshot.burstTime < 4 && snapshot.beta > 0.998;
 
-  return <main className="experience impact-layout flythrough-layout">
+  return <main className={`experience impact-layout flythrough-layout cinematic-layout${explain ? ' explain-open' : ''}${moment ? ' measurement-moment' : ''}`}>
     <canvas ref={canvas} id="universe" tabIndex={0} aria-label="Relativistic flight through stationary gates and a gridded station. Drag to look around. Velocity remains along lab +X." />
     <div className="shade" aria-hidden="true" />
     <svg className="cockpit" viewBox="0 0 1440 900" preserveAspectRatio="none" aria-hidden="true">
@@ -125,8 +129,8 @@ export function App() {
       <div className="velocity"><output data-testid="beta" data-beta={snapshot.beta}>{snapshot.beta.toFixed(3)}</output><span>c</span></div>
       <div className="gamma"><span>LORENTZ FACTOR</span><b>γ <output data-testid="gamma">{snapshot.gamma.toFixed(3)}</output></b></div>
       <h1>{stage}</h1>
-      <button className="experience-button burst-button" onClick={burst} disabled={!!error}>BURST TO 0.999c <span>SPACE ↗</span></button>
-      <p className="burst-status"><strong data-testid="burst-phase" data-phase={snapshot.burstPhase ?? ''} data-burst-time={snapshot.burstTime ?? ''}>{snapshot.burstPhase ?? (snapshot.running ? 'CRUISING' : 'READY TO FLY')}</strong><span>Illustrative acceleration</span></p>
+      <button className="experience-button burst-button" onClick={burst} disabled={!!error}>ENGAGE RELATIVITY <span>SPACE ↗</span></button>
+      <p className="burst-status"><strong data-testid="burst-phase" data-phase={snapshot.burstPhase ?? ''} data-burst-time={snapshot.burstTime ?? ''}>{snapshot.burstPhase ?? (snapshot.running ? 'CRUISING' : 'READY TO FLY')}</strong><span>illustrative acceleration profile</span></p>
       <button className="instant-experience" onClick={experience} disabled={!!error}>Experience 99.9% of light speed instantly</button>
       <p className="subtitle">Lab distance <output data-testid="distance" data-position={snapshot.position}>{snapshot.position.toFixed(2)}</output> light-seconds · gates every 0.45 ls</p>
       <div className="doppler"><span>AHEAD · APPROACH <b data-testid="doppler-forward">{snapshot.approach.toFixed(2)}×</b><Wavelength doppler={snapshot.approach} /></span>
@@ -134,6 +138,10 @@ export function App() {
       <small className="frequency-note">Observed / emitted frequency · illustrative colour</small>
     </section>
 
+    <div className="physics-view-title"><strong>PHYSICS SIMULATION</strong><span>deterministic special relativity</span></div>
+    <aside className="journey-clocks" aria-label="Accumulated journey clocks"><Clock seconds={snapshot.lab} label="LAB CLOCK" kind="lab" />
+      <Clock seconds={snapshot.proper} label="SHIP CLOCK" kind="proper" /></aside>
+    <div className="explain-layer" aria-label="Physics explanation">
     <section className="measurement-panel" aria-label="Simultaneous lab-frame length measurement">
       <div className="instrument-title"><span className="eyebrow">01 / LENGTH CONTRACTION</span><span className="measurement-frame">SIDE ON · FIXED SCALE</span></div>
       <div className="length-headline"><span>100 m <i>→</i></span><b><output data-testid="length">{(100 * snapshot.length).toFixed(2)}</output> <small>m</small></b></div>
@@ -152,11 +160,10 @@ export function App() {
     <aside className="time-panel" aria-label="Time dilation and accumulated journey clocks">
       <div className="instrument-title"><span className="eyebrow">02 / TIME DILATION</span><span className="state-light">{hidden ? 'TAB HIDDEN' : snapshot.running ? 'RUNNING' : 'PAUSED'}</span></div>
       <div className="rate-statement"><span>{snapshot.transitioning ? 'At the current speed' : 'At this speed'}: 1 second onboard</span><strong>= <output data-testid="lab-per-ship-second">{snapshot.gamma.toFixed(2)}</output> <small>seconds in the lab</small></strong></div>
-      <div className="clock-pair"><Clock seconds={snapshot.lab} label="LAB · JOURNEY TOTAL" kind="lab" />
-        <Clock seconds={snapshot.proper} label="SHIP · JOURNEY TOTAL" kind="proper" /></div>
       <p className="tick-note">Each sweep = 1 second on that clock. No time multiplier.</p>
       <p className="constant-comparison"><span>Calculated comparison at this constant speed</span>60 lab seconds <b>→ <output data-testid="ship-over-60">{(60 * snapshot.properRate).toFixed(2)}</output> ship seconds</b></p>
     </aside>
+    </div>
     <ReactorPanel key="reactor-world" snapshot={snapshot} />
 
     <div className="sight" aria-hidden="true"><div className="reticle">+</div><span>{view === 'FORWARD / +X' ? 'VELOCITY +X' : 'VIEW AXIS'}</span></div>
@@ -185,7 +192,7 @@ export function App() {
       {tour && <div className="tour-progress" style={{ width: `${snapshot.demoTime! / DEMO_DURATION * 100}%` }} />}
     </section>
 
-    <footer className="footer overlay"><div><div className="colour-key"><span>REDSHIFT</span><i /><span>BLUESHIFT</span></div>
+    <footer className="footer overlay"><button className="explain-toggle" aria-expanded={explain} onClick={() => setExplain(!explain)}>{explain ? 'Close Explain' : 'Explain'}</button><div><div className="colour-key"><span>REDSHIFT</span><i /><span>BLUESHIFT</span></div>
       <span className="colour-label">{spectral ? 'Approximate spectra · illustrative exposure, not literal eye appearance' : 'Doppler false colour — not literal eye appearance'}</span>
       <span className="source-note">{STAR_COUNT.toLocaleString()} SYNTHETIC STARS · STATIONARY LAB COURSE · 1 LIGHT-SECOND = c × 1 LAB SECOND</span></div>
       <details><summary>Display & science <span>+</span></summary><div className="details-panel">

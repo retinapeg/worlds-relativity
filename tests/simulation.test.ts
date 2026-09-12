@@ -115,19 +115,22 @@ it('bursts continuously from rest, coasts, brakes and keeps flying at low speed'
   const before = { ...s.clocks };
   s.startBurst();
   expect(s.clocks).toEqual(before);
-  expect(s.snapshot()).toMatchObject({ beta: 0, burstPhase: 'ACCELERATING', burstTime: 0 });
-  s.advance(0.4);
-  expect(s.eta).toBeCloseTo(Math.atanh(0.999) / 2, 12);
-  s.advance(0.4);
+  expect(s.snapshot()).toMatchObject({ beta: 0, burstPhase: 'COASTING', burstTime: 0 });
+  s.advance(1);
+  expect(s.snapshot().burstPhase).toBe('ACCELERATING');
+  expect(s.snapshot().beta).toBeCloseTo(BURST_BASELINE, 12);
+  s.advance(0.5);
+  expect(s.eta).toBeCloseTo((Math.atanh(BURST_BASELINE) + Math.atanh(0.999)) / 2, 12);
+  s.advance(0.5);
   expect(s.snapshot()).toMatchObject({ burstPhase: 'COASTING', transitioning: false });
   expect(s.snapshot().beta).toBeCloseTo(0.999, 12);
   const position = s.clocks.position;
-  s.advance(1.5);
-  expect(s.clocks.position - position).toBeCloseTo(1.5 * 0.999, 12);
+  s.advance(3);
+  expect(s.clocks.position - position).toBeCloseTo(3 * 0.999, 12);
   expect(s.snapshot().burstPhase).toBe('BRAKING');
-  s.advance(0.4);
+  s.advance(0.75);
   expect(s.eta).toBeCloseTo((Math.atanh(0.999) + Math.atanh(BURST_BASELINE)) / 2, 12);
-  s.advance(0.4);
+  s.advance(0.75);
   expect(s.snapshot()).toMatchObject({ burstPhase: null, burstTime: null, transitioning: false, running: true });
   expect(s.snapshot().beta).toBeCloseTo(BURST_BASELINE, 12);
   const recovery = { ...s.clocks };
@@ -143,26 +146,29 @@ it('brakes before a new burst at .999 without resetting the journey or repeating
   expect(s.clocks).toEqual(before);
   expect(s.snapshot().burstPhase).toBe('BRAKING');
   expect(s.snapshot().beta).toBeCloseTo(0.999, 12);
-  s.advance(0.8);
-  expect(s.snapshot().burstPhase).toBe('ACCELERATING');
+  expect(s.snapshot().burstTime).toBe(-0.6);
+  s.advance(0.6);
+  expect(s.snapshot().burstPhase).toBe('COASTING');
+  expect(s.snapshot().burstTime).toBe(0);
   expect(s.snapshot().beta).toBeCloseTo(BURST_BASELINE, 12);
-  s.advance(0.8);
+  s.advance(2);
   expect(s.snapshot().burstPhase).toBe('COASTING');
   expect(s.snapshot().beta).toBeCloseTo(0.999, 12);
-  s.advance(2.3);
+  expect(s.snapshot().burstTime).toBeCloseTo(2, 12);
+  s.advance(4.5);
   expect(s.snapshot().burstPhase).toBeNull();
   s.advance(20);
   expect(s.snapshot().beta).toBeCloseTo(BURST_BASELINE, 12);
-  expect(s.clocks.lab).toBeCloseTo(before.lab + 23.9, 10);
+  expect(s.clocks.lab).toBeCloseTo(before.lab + 27.1, 10);
   expect(s.clocks.position).toBeGreaterThan(before.position);
 });
 
 it('integrates each finite burst identically across frame rates and long frames', () => {
-  // Independent analytic totals: the .8 s linear-rapidity intervals, 1.5 s
-  // at .999, then .2 until t=10. High starts include one extra braking interval.
+  // Independent analytic totals for the new 6.5 s programme: low introduction,
+  // 1 s ramp, 3 s high hold, 1.5 s braking; high starts add .6 s pre-braking.
   for (const [initial, proper, position] of [
-    [0, 7.443505986164453, 4.21920182123867],
-    [0.999, 6.927583881561571, 4.778043604509672],
+    [0, 5.578396376885021, 5.493463090229079],
+    [0.999, 5.209301036876013, 5.986510413338752],
   ]) {
     for (const hz of [0.1, 30, 60, 144]) {
       const s = new Simulation(); s.setVelocity(initial); s.startBurst();
@@ -188,7 +194,7 @@ it('pauses a burst exactly, cancels on manual throttle and clears it on reset', 
   const paused = s.snapshot(); s.advance(1000);
   expect(s.snapshot()).toEqual(paused);
   s.running = true; s.advance(0.25);
-  expect(s.snapshot().burstTime).toBeCloseTo(0.5, 12);
+  expect(s.snapshot().burstTime).toBeCloseTo(-0.1, 12);
   const clocks = { ...s.clocks };
   s.setVelocity(0.6);
   expect(s.clocks).toEqual(clocks);

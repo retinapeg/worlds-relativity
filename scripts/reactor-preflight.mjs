@@ -81,7 +81,7 @@ try {
       await page.waitForFunction(() => Boolean(window.__reactorFixture));
       const setup = ['native-error','stall','unmount'].includes(scenario) ? 'frames' : scenario;
       await page.evaluate(name => window.__reactorFixture.setScenario(name), setup);
-      await page.getByRole('button', { name:'✦ Generate & enter Reactor world', exact:true }).click();
+      await page.getByRole('button', { name:/Generate AI World|Generate & enter Reactor world/i }).click();
       if (scenario === 'play-rejection') {
         await page.getByRole('button', { name:'Play video', exact:true }).waitFor();
         assert.notEqual(await page.getByTestId('world-status').getAttribute('data-state'), 'VIDEO PLAYING');
@@ -168,7 +168,7 @@ try {
       if (scenario === 'frames') {
         // A second explicit start may reuse the persisted world; UI updates above
         // must still have used exactly one allocation. This restart is deliberate.
-        await page.getByRole('button', { name:'✦ Generate & enter Reactor world', exact:true }).click();
+        await page.getByRole('button', { name:/Generate AI World|Generate & enter Reactor world/i }).click();
         await playing(page);
         const reused = await page.evaluate(() => ({ ...window.__reactorFixture.calls }));
         assert.equal(reused.connect, 2); assert.equal(reused.createWorld, 1);

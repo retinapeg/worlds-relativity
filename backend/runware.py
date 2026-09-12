@@ -18,10 +18,13 @@ router = APIRouter(prefix="/api/runware")
 lock = asyncio.Lock()
 MODEL = "runware:101@1"
 PROMPT = (
-    "Cinematic first-person spacecraft observation deck, elegant dark cockpit framing "
-    "a vast luminous violet and blue nebula, distant golden planet, fine stars, "
-    "photorealistic science fiction production design, balanced exposure, no text, "
-    "no people, no motion blur. Wide landscape establishing frame."
+    "Cinematic first-person futuristic spacecraft cockpit approaching a colossal "
+    "illuminated orbital gate, concentric cyan and amber polygon rings receding "
+    "toward a distant vanishing point. Nearby intricate geometric trusses frame "
+    "the view with strong forward depth and parallax cues. Dark space, delicate "
+    "violet nebula, fine stars, elegant cockpit edges, photorealistic film lighting, "
+    "crisp geometry, no people, no text, no letters, no HUD or interface overlays. "
+    "Wide landscape composition, balanced exposure, no motion blur."
 )
 MAX_IMAGE = 2_000_000
 
@@ -47,7 +50,7 @@ def status():
     cost = None
     if ready:
         cost = json.loads((root / "frame.json").read_text())["cost_usd"]
-    return {"provider": "Runware", "configured": configured, "ready": ready,
+    return {"provider": "Runware", "hosting": "modal" if os.getenv("WORLD_ASSET_VOLUME") else "local", "configured": configured, "ready": ready,
             "can_generate": configured and enabled and not attempted and not ready,
             "attempted": attempted, "cost_usd": cost}
 

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-type ArtworkStatus = { ready: boolean; can_generate: boolean; configured: boolean; attempted: boolean; cost_usd: number | null };
+type ArtworkStatus = { hosting?: string; ready: boolean; can_generate: boolean; configured: boolean; attempted: boolean; cost_usd: number | null };
 const headers = { 'X-Relativity-Client': '1' };
 export function useRunwareArtwork() {
   const [status, setStatus] = useState<ArtworkStatus | null>(null);
@@ -53,5 +53,5 @@ export function useRunwareArtwork() {
       if (mounted.current) { setMessage(error instanceof Error ? error.message : 'Artwork generation failed.'); setStatus(null); }
     } finally { if (mounted.current) setBusy(false); }
   };
-  return { image, url, message, busy, canGenerate: !!status?.can_generate, generate };
+  return { image, url, message, busy, status, canGenerate: !!status?.can_generate, generate };
 }

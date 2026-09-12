@@ -17,6 +17,7 @@ function safeError(error: unknown) {
 
 function World({ snapshot }: { snapshot: Snapshot }) {
   const artwork = useRunwareArtwork();
+  const [artworkVisible, setArtworkVisible] = useState(false);
   const api = useHappyOyster();
   const apiRef = useRef(api); apiRef.current = api;
   const latest = useRef(snapshot); latest.current = snapshot;
@@ -244,7 +245,7 @@ function World({ snapshot }: { snapshot: Snapshot }) {
     building ? 'Reactor: Building world' : streaming ? 'Reactor: Starting stream' : 'Reactor: Connecting' :
     step === 'failed' ? 'Reactor: error' : 'Reactor: stopped';
   return <section className="world-panel" aria-label="Reactor generated world">
-    <div className="world-heading"><div><span className="eyebrow">{playing ? 'REACTOR · LIVE VIDEO' : 'REACTOR · VIDEO UNVERIFIED'}</span><h2>The journey, imagined.</h2></div>
+    <div className="world-heading"><div><span className="eyebrow">{playing ? 'REACTOR · LIVE VIDEO' : 'REACTOR · VIDEO UNVERIFIED'}</span><h2>{playing ? 'AI WORLD' : active ? 'Reactor is imagining this journey…' : 'Generate AI World'}</h2></div>
       <span className={`world-status ${playing ? 'live' : ''}`} data-testid="world-status"
         data-state={playing ? 'VIDEO PLAYING' : step.toUpperCase()}
         title={playing ? 'Receiving advancing decoded video frames' : 'Video is not playing'}>{reactorLabel}</span></div>
@@ -257,11 +258,15 @@ function World({ snapshot }: { snapshot: Snapshot }) {
         {!active && <span>{artwork.image ? 'RUNWARE STARTING FRAME · HAPPYOYSTER DIRECTING' : 'HAPPYOYSTER · DIRECTING MODE'}</span>}</div>}
       {playing && <span className="world-countdown">{remaining}s remaining</span>}
     </div>
+    {artwork.url && !playing && <figure className="runware-frame">
+      <img src={artwork.url} alt="Runware-generated cockpit approaching an illuminated orbital gate" onLoad={() => setArtworkVisible(true)} onError={() => setArtworkVisible(false)} />
+      <figcaption>Runware-generated artwork · illustrative still</figcaption>
+    </figure>}
     <p className="ai-label">AI-generated illustration — not an exact relativistic optical rendering.</p>
     <div className="artwork-status" role="status"><span>{artwork.message}</span>
       {artwork.canGenerate && <button disabled={active || artwork.busy} onClick={() => { void artwork.generate(); }}>
         {artwork.busy ? 'Generating…' : 'Generate starting frame'}</button>}</div>
-    <div className="world-controls"><button className="start-world" onClick={() => { if (needsReload) window.location.reload(); else void start(); }} disabled={active}>✦ {needsReload ? 'Reload page' : 'Generate & enter Reactor world'}</button>
+    <div className="world-controls"><button className="start-world" onClick={() => { if (needsReload) window.location.reload(); else void start(); }} disabled={active}>✦ {needsReload ? 'Reload page' : 'Generate AI World'}</button>
       <button onClick={() => { void stop(); }} disabled={!active}>Stop world</button><span>ONE WORLD · 3 MIN MAX</span></div>
     <div className="direction-status" role="status">
       <div data-testid="world-local-direction">Local: {direction.key} · {direction.action}</div>
@@ -272,7 +277,12 @@ function World({ snapshot }: { snapshot: Snapshot }) {
         accepted ? 'Local view changed · awaiting latest direction.' : instructionState}</small>
     </div>
     {message && <p className="provider-error" role="alert">{message} Local science remains available.</p>}
-    <p className="ai-label" data-testid="world-provenance">World: Reactor / HappyOyster · {openingArtwork ? 'Opening artwork: Runware · ' : ''}{backend === 'modal' ? 'Backend: Modal · ' : ''}Physics: local deterministic engine</p>
+    <div className="sponsor-provenance" data-testid="world-provenance">
+      <span>PHYSICS — Local deterministic SR engine · ● ACTIVE</span>
+      <span>AI WORLD — Reactor / HappyOyster · {playing ? '● ACTIVE' : step === 'failed' ? '× BLOCKED' : '○ READY / UNVERIFIED'}</span>
+      <span>VISUAL ASSET — Runware · {artworkVisible && (!playing || openingArtwork) ? '● ACTIVE' : artwork.status?.attempted && !artwork.status.ready ? '× BLOCKED' : '○ READY / UNVERIFIED'}</span>
+      <span>BACKEND — Modal · {backend === 'modal' || artwork.image && artwork.status?.hosting === 'modal' ? '● ACTIVE' : '○ READY / UNVERIFIED'}</span>
+    </div>
     <details className="world-diagnostics"><summary>Connection details</summary><p>Reactor: {api.phase} · Last connected world snapshot: {api.worldState?.phase ?? 'none'} · Travel: {stopConfirmed ? 'completed (end confirmed)' : api.travelState?.status ?? 'none'}</p>
       <p>{stopConfirmed ? 'Provider confirmed travel ended.' : 'No travel-end confirmation for this connection.'}</p>
       <p>{mediaEvidence}</p>

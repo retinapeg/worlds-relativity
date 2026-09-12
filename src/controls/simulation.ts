@@ -16,9 +16,8 @@ const CUES = [
 ];
 export const DEMO_DURATION = 54;
 const TRANSITION_SECONDS = 0.8;
-export const BURST_BASELINE = 0.2;
+export const BURST_BASELINE = 0.1;
 export type BurstPhase = 'BRAKING' | 'ACCELERATING' | 'COASTING';
-const BURST_COAST_SECONDS = 1.5;
 
 export class Simulation {
   input: ControlInput = { targetBeta: 0, lookYaw: 0, lookPitch: 0 };
@@ -29,13 +28,14 @@ export class Simulation {
   demoTime: number | null = null;
   opticalBaseline = false;
   private cue = 0;
-  private ramp: { from: number; to: number; elapsed: number } | null = null;
-  private burst: { phase: BurstPhase; elapsed: number; time: number; finalBrake: boolean } | null = null;
+  private ramp: { from: number; to: number; elapsed: number; duration: number } | null = null;
+  private burst: { phase: BurstPhase; elapsed: number; time: number; duration: number; slowHold: boolean; finalBrake: boolean } | null = null;
 
   constructor(running = true) { this.running = running; }
 
-  setVelocity(beta: number, manual = true) {
+  setVelocity(beta: number, manual = true, duration = TRANSITION_SECONDS) {
     if (finite(beta) < 0 || beta > MAX_BETA) throw new RangeError('Control beta must be in [0, 0.999]');
+    if (finite(duration) <= 0) throw new RangeError('Transition duration must be positive');
     if (manual) { this.burst = null; this.stopDemo(); }
     this.input.targetBeta = beta;
     const to = Math.atanh(beta);
@@ -44,7 +44,7 @@ export class Simulation {
     if (manual || !this.running) { this.record(); this.eta = to; this.ramp = null; return; }
     if (Math.abs(to - this.eta) < 1e-12) { this.ramp = null; return; }
     this.record();
-    this.ramp = { from: this.eta, to, elapsed: 0 };
+    this.ramp = { from: this.eta, to, elapsed: 0, duration };
   }
   stopDemo() {
     this.demoTime = null;
@@ -54,18 +54,21 @@ export class Simulation {
   }
   startBurst() {
     this.burst = null; this.stopDemo(); this.running = true;
-    const braking = Math.tanh(this.eta) > BURST_BASELINE;
-    this.burst = { phase: braking ? 'BRAKING' : 'ACCELERATING', elapsed: 0, time: 0, finalBrake: false };
-    this.setVelocity(braking ? BURST_BASELINE : MAX_BETA, false);
+    const braking = Math.tanh(this.eta) > 0.2;
+    this.burst = { phase: braking ? 'BRAKING' : 'COASTING', elapsed: 0, time: braking ? -0.6 : 0,
+      duration: braking ? 0.6 : 1, slowHold: !braking, finalBrake: false };
+    // Preserve continuity even when the user starts from rest instead of slow flight.
+    this.setVelocity(BURST_BASELINE, false, this.burst.duration);
   }
   private applyBurstBoundary() {
     const burst = this.burst;
-    if (!burst || burst.elapsed < (burst.phase === 'COASTING' ? BURST_COAST_SECONDS : TRANSITION_SECONDS) - 1e-9) return;
+    if (!burst || burst.elapsed < burst.duration - 1e-9) return;
     burst.elapsed = 0;
     if (burst.phase === 'BRAKING' && burst.finalBrake) { this.burst = null; this.record(); }
-    else if (burst.phase === 'BRAKING') { burst.phase = 'ACCELERATING'; this.setVelocity(MAX_BETA, false); }
-    else if (burst.phase === 'ACCELERATING') burst.phase = 'COASTING';
-    else { burst.phase = 'BRAKING'; burst.finalBrake = true; this.setVelocity(BURST_BASELINE, false); }
+    else if (burst.phase === 'BRAKING') { burst.phase = 'COASTING'; burst.slowHold = true; burst.duration = 1; burst.time = 0; }
+    else if (burst.slowHold) { burst.phase = 'ACCELERATING'; burst.slowHold = false; burst.duration = 1; this.setVelocity(MAX_BETA, false, 1); }
+    else if (burst.phase === 'ACCELERATING') { burst.phase = 'COASTING'; burst.duration = 3; }
+    else { burst.phase = 'BRAKING'; burst.finalBrake = true; burst.duration = 1.5; this.setVelocity(BURST_BASELINE, false, 1.5); }
   }
   setLook(yaw: number, pitch = 0) {
     this.stopDemo();
@@ -110,16 +113,16 @@ export class Simulation {
       const untilCue = this.demoTime === null ? Infinity :
         (CUES[this.cue]?.at ?? DEMO_DURATION) - this.demoTime;
       const untilBurst = this.burst === null ? Infinity :
-        (this.burst.phase === 'COASTING' ? BURST_COAST_SECONDS : TRANSITION_SECONDS) - this.burst.elapsed;
-      const step = Math.min(dt, untilCue, untilBurst, this.ramp ? Math.min(0.1, TRANSITION_SECONDS - this.ramp.elapsed) : Infinity);
+        this.burst.duration - this.burst.elapsed;
+      const step = Math.min(dt, untilCue, untilBurst, this.ramp ? Math.min(0.1, this.ramp.duration - this.ramp.elapsed) : Infinity);
       if (step <= 1e-10) break;
       if (this.ramp) {
-        this.ramp.elapsed = Math.min(TRANSITION_SECONDS, this.ramp.elapsed + step);
-        const next = this.ramp.from + (this.ramp.to - this.ramp.from) * this.ramp.elapsed / TRANSITION_SECONDS;
+        this.ramp.elapsed = Math.min(this.ramp.duration, this.ramp.elapsed + step);
+        const next = this.ramp.from + (this.ramp.to - this.ramp.from) * this.ramp.elapsed / this.ramp.duration;
         this.clocks = advanceRamp(this.clocks, this.eta, next, step);
         this.eta = next;
         this.record(); // Curved prescribed intervals are sampled; manual segments stay exact.
-        if (this.ramp.elapsed >= TRANSITION_SECONDS - 1e-9) {
+        if (this.ramp.elapsed >= this.ramp.duration - 1e-9) {
           this.eta = this.ramp.to; this.ramp = null; this.record();
         }
       } else this.clocks = advanceClocks(this.clocks, Math.tanh(this.eta), step);

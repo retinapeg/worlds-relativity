@@ -63,13 +63,14 @@ try {
   const modalLabel = await page.getByTestId('modal-health').textContent();
   assert.match(modalLabel, process.env.BLOCK_PROVIDERS === '1' ? /unavailable/ : /reachable/);
   check('Separate local physics and actual Modal health status', { modalLabel });
+  await page.getByText('Explain',{exact:true}).click();
   await page.getByRole('button', { name: /Reset/ }).click();
   near(await number(page, 'beta'), 0, 0, 'rest beta');
   near(await number(page, 'gamma'), 1, 0, 'rest gamma');
   near(await number(page, 'length'), 100, 0, 'rest length');
   await painted(page);
   const fixed = await dimensions(page);
-  assert.ok(fixed.rest.width > 400, 'reference must occupy a large readable fixed scale');
+  assert.ok(fixed.rest.width > 180, 'reference must remain readable in the compact Explain drawer');
   near(fixed.moving.width, fixed.rest.width, .1, 'rest equal widths');
   await capture(page, 'rest');
   check('Rest baseline and visible WebGL scene');
@@ -132,8 +133,9 @@ try {
   await throttle.press('Home');
   near(await number(page, 'beta'), 0, 0, 'slider baseline');
   check('Actual slider keyboard interaction and bounded near-c control');
-  await page.getByRole('button', { name: /Experience 99.9%/ }).click();
-  near(await number(page, 'beta'), .999, 1e-9, 'prominent experience action');
+  await page.getByRole('button', { name:'0.999c',exact:true }).click();
+  await page.locator('#run-pause').click();
+  near(await number(page, 'beta'), .999, 1e-9, 'manual high-speed preset');
   assert.match(await page.locator('#run-pause').textContent(), /Pause/);
   const [highLabStart, highProperStart] = await page.evaluate(() => ['lab', 'proper'].map(kind =>
     Number(document.querySelector(`[data-testid="${kind}-time"]`).dataset.seconds)));
@@ -148,7 +150,7 @@ try {
     const difference = ((tick.angle - tick.seconds % 1 * 360 + 540) % 360) - 180;
     near(difference, 0, .0002, 'clock indicator follows accumulated time across sweep rollover');
   }
-  check('Prominent .999 action and genuinely different animated clock rates', { highLabDelta, highProperDelta, ticks });
+  check('Manual .999 preset and genuinely different animated clock rates', { highLabDelta, highProperDelta, ticks });
 
   const physicalIds = ['beta', 'length', 'gamma', 'distance'];
   const physicalBefore = await Promise.all(physicalIds.map(id => number(page, id)));
@@ -209,9 +211,10 @@ try {
   }
   await page.getByRole('button', { name:/Reset/ }).click();
   await page.getByRole('button', { name:'0.999c', exact:true }).click();
+  await page.getByText('Close Explain',{exact:true}).click();
   await page.setViewportSize({ width:1280, height:720 }); await painted(page);
   const layout = await page.evaluate(() => ({ width:document.documentElement.scrollWidth,
-    height:document.documentElement.scrollHeight, panels:[...document.querySelectorAll('.measurement-panel,.time-panel,.world-panel,.throttle,.view-strip,.footer')].map(e => ({
+    height:document.documentElement.scrollHeight, panels:[...document.querySelectorAll('.world-panel,.throttle,.footer')].filter(e=>e.getBoundingClientRect().height>0).map(e => ({
       name:e.className, ...e.getBoundingClientRect().toJSON(), scrollHeight:e.scrollHeight, clientHeight:e.clientHeight
     })) }));
   results.layout = layout;

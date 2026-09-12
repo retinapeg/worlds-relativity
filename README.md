@@ -37,7 +37,7 @@ Provider keys never go in `VITE_*`, browser source, Git or logs.
   are illustrative, not a propulsion or realistic acceleration programme. Adjacent
   clocks and tick indicators use actual accumulated times. The 60-lab-second
   comparison is calculated at the current constant speed, not elapsed journey time.
-- **BURST TO 0.999c** or Space runs a finite acceleration/coast/brake programme.
+- **ENGAGE RELATIVITY** or Space runs a finite acceleration/coast/brake programme.
   P pauses; manual slider/presets cancel; reset clears it. Position and clocks
   keep their history. The stationary gates and truss use light-second scene units,
   spaced 0.45 light-seconds apart, and receive the existing photon transform once.
@@ -70,19 +70,19 @@ Provider keys never go in `VITE_*`, browser source, Git or logs.
 ```sh
 ./scripts/npm.sh test
 ./scripts/npm.sh run typecheck
-./scripts/npm.sh run build -- --outDir build/relativity-flythrough-candidate
+./scripts/npm.sh run build -- --outDir build/relativity-cinematic-candidate
 .venv/bin/python -m pytest tests/test_backend.py tests/test_runware.py -q
 ```
 
-Fly-through candidate output: `build/relativity-flythrough-candidate`, preview port
-4175. Preserve the earlier `build/relativity-candidate` at port 4174. The Vite config serves and copies
+Fly-through candidate output: `build/relativity-cinematic-candidate`, preview port
+4176. Preserve the earlier `build/relativity-candidate` at port 4174. The Vite config serves and copies
 both existing Reactor SDK WASM artifacts; it does not build a new WASM toolchain.
 The version-checked prepare script patches three vendor expressions to use HTTPS
 media signalling and its DNS route on localhost. It runs before dev/build and
 fails if the expected SDK source changes. No TLS validation is bypassed.
 The preserved C++ core has its own existing native/WASM test scripts.
 The current gate and recording are in QA.md and
-`build/evidence/flythrough/final-verification.json`. The earlier verification receipt
+`build/evidence/flythrough/cinematic-verification.json`. The earlier verification receipt
 belongs to preserved commit 2f362600, not this candidate.
 HANDOFF.md is the consolidated current status.
 

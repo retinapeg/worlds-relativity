@@ -78,13 +78,15 @@ paused at 0.999c at 54 seconds. Manual speed, view or baseline control interrupt
 the automated sequence. A visibility boundary resets the
 wall-clock timestamp. Long hidden intervals do not advance this educational timeline.
 
-The finite burst uses the same ramp integrator and historical accumulators: from
-low speed, ramp to 0.999c in 0.8 lab seconds, hold for 1.5, then ramp to 0.2c in
-0.8 and continue cruising. A start above 0.2c first brakes to 0.2c over 0.8 seconds.
-Position and clocks never reset during a burst. Manual speed input cancels it;
-pause freezes its phase and all accumulators, reset clears it, and camera or
-optical-baseline changes preserve it. The phase timer schedules transitions only;
-it is advanced by the same lab timestep, not a separate animation clock.
+The final cinematic burst uses the same ramp integrator and accumulators. Its
+canonical programme time is 0–6.5 lab seconds: 0–1 slow introduction (from rest,
+gently approach 0.1c), 1–2 rapidity ramp to 0.999c, 2–5 high-speed hold, 5–6.5
+rapidity ramp to 0.1c. A start above 0.2c first brakes over 0.6 seconds, represented
+as negative programme time. All times schedule the same lab timestep; position
+and clocks never reset. Manual speed input cancels, pause freezes, reset clears,
+and camera/baseline changes preserve it. The default app already moves at 0.1c.
+The fixed-scale measurement overlay uses programme seconds 2–4, independent of
+whether pre-braking was needed. The original tour still uses its 0.8-second ramps.
 
 ## Colour approximation
 

@@ -1,5 +1,32 @@
 # DEMO FREEZE
 
+## Final cinematic presentation — user override at 16:18 BST
+
+The latest user instruction supersedes the earlier dashboard layout and short
+burst: start moving at 0.1c, make the flight fill the presentation, use one central
+ENGAGE RELATIVITY action (Space), and move detailed instruments into Explain.
+The prescribed sequence is 1 second slow introduction, 1 second rapidity ramp,
+3 seconds at 0.999c and 1.5 seconds braking to 0.1c. An already-fast start first
+brakes for 0.6 seconds without resetting history. The existing fixed-scale length
+and rate comparison appears at programme seconds 2–4. Actual advancing Reactor
+frames alone trigger the 55/45 split; the local engine is TypeScript/WebGL, with
+the preserved C++/WASM implementation retained for verification, not mislabelled
+as the active renderer. No physics-engine or mathematical reference changes.
+
+Preserve verified commit 5ca2502 and its build/relativity-flythrough-candidate
+(port 4175), as well as 2f362600 and the immutable original fallback. The final
+presentation builds separately into build/relativity-cinematic-candidate, port
+4176. Current evidence is labelled cinematic under build/evidence/flythrough;
+the aggregate receipt is cinematic-verification.json. Do not combine revision
+counts. The final 16:30 deadline remains; no new agents or dependencies.
+
+The separate final sponsor instruction authorises exactly ONE Runware still
+request through Modal only after expected cost is established at no more than
+US$1. No retry, video, model upgrade or new Reactor allowance is included. Only
+the existing integration owner may execute it. Source/asset results are recorded
+in the final evidence; no status is active merely because code exists.
+
+
 ## Current fly-through candidate — bounded user override at 15:45 BST
 
 The latest explicit brief permits a stationary finite course and a short burst,

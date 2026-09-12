@@ -6,7 +6,7 @@ import { resolve, dirname } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { cpus } from 'node:os';
 
-const folder = resolve('build/evidence/flythrough');
+const folder = resolve(process.env.QA_OUTPUT_DIR || 'build/evidence/flythrough');
 const label = process.env.QA_LABEL || 'flythrough-dev';
 assert.match(label, /^[\w-]+$/);
 let origin = process.env.DEMO_URL || 'http://127.0.0.1:5173';
@@ -69,7 +69,12 @@ async function prepare(context) {
   });
   await page.goto(origin, { waitUntil:'networkidle' });
   await page.waitForFunction(() => document.querySelector('.connection')?.textContent.includes('Physics: local / offline ready'));
-  await page.getByRole('button', { name:/BURST TO 0.999c/i }).waitFor();
+  await page.getByRole('button', { name:/ENGAGE RELATIVITY/i }).waitFor();
+  const initial=await state(page); await page.waitForTimeout(250); const moving=await state(page);
+  near(initial.beta,.1,.0011,'default slow flight'); assert.ok(moving.position>initial.position && moving.lab>initial.lab,'default scene advances without setup');
+  const viewport=await page.evaluate(()=>({w:innerWidth,h:innerHeight,scrollWidth:document.documentElement.scrollWidth,scrollHeight:document.documentElement.scrollHeight,scene:document.querySelector('#universe').getBoundingClientRect().toJSON()}));
+  assert.equal(viewport.scrollWidth,viewport.w);assert.equal(viewport.scrollHeight,viewport.h);assert.ok(viewport.scene.height/viewport.h>=.65,'flight occupies at least65% of viewport height');
+  check('Default slow flight starts immediately without scrolling',{initial,moving,viewport});
   await page.getByRole('button', { name:/Reset/ }).click();
   return page;
 }
@@ -109,25 +114,26 @@ function difference(a,b) {
 }
 async function burst(page, from) {
   await speed(page,from); await run(page,true); await page.waitForTimeout(300);
-  const before = await state(page); await page.getByRole('button',{name:/BURST TO 0.999c/i}).click();
+  const before = await state(page); await page.getByRole('button',{name:/ENGAGE RELATIVITY/i}).click();
   const samples = []; const start = performance.now();
   do { samples.push(await state(page)); await page.waitForTimeout(70); }
-  while (performance.now()-start < (from > .2 ? 4200 : 3400));
+  while (performance.now()-start < (from > .1 ? 7800 : 7000));
   for (const s of samples) {
     assert.ok(Number.isFinite(s.beta) && s.beta >= 0 && s.beta <= .99900001);
     assert.ok(s.lab >= before.lab && s.proper >= before.proper && s.position >= before.position);
     assert.ok(s.proper <= s.lab + 1e-6);
   }
   const phases = samples.map(s=>s.phase).filter((v,i,a)=>v && v!==a[i-1]);
-  assert.deepEqual(phases,from > .2 ? ['BRAKING','ACCELERATING','COASTING','BRAKING'] : ['ACCELERATING','COASTING','BRAKING']);
+  assert.deepEqual(phases,from>.2 ? ['BRAKING','COASTING','ACCELERATING','COASTING','BRAKING'] : ['COASTING','ACCELERATING','COASTING','BRAKING']);
   assert.ok(samples.some(s=>s.beta > .998));
-  const after = await state(page); near(after.beta,.2,.0011,'finite burst recovers low speed'); assert.equal(after.phase,'');
+  const after = await state(page); near(after.beta,.1,.0011,'finite burst recovers low speed'); assert.equal(after.phase,'');
   check('Finite burst from ' + from + 'c preserves journey and visibly changes phases', { before,after,phases,samples });
 }
 try {
   if (process.env.CHECKS !== '0') {
   const context = await browser.newContext({ viewport:{width:1440,height:900},deviceScaleFactor:1 });
   const page = await prepare(context);
+  const explain=page.getByText('Explain',{exact:true}); if(await explain.count()) await explain.click();
   await speed(page,.6); await run(page,true);
   const firstState = await state(page), first = await scene(page,'motion-before');
   await page.waitForTimeout(1100);
@@ -146,10 +152,10 @@ try {
   await page.getByTestId('optical-baseline').click();
   check('Same-time baseline changes rendered geometry while preserving state and subsequent translation',{exact,opticalDifference,baselineStart,baselineEnd});
   await page.getByRole('button',{name:/Reset/}).click(); await burst(page,0); await burst(page,.999);
-  await page.getByRole('button',{name:/BURST TO 0.999c/i}).click(); await page.waitForTimeout(200); await run(page,false);
+  await page.getByRole('button',{name:/ENGAGE RELATIVITY/i}).click(); await page.waitForTimeout(200); await run(page,false);
   const paused=await state(page); await page.waitForTimeout(350); assert.deepEqual(await state(page),paused);
   await speed(page,.6); assert.equal((await state(page)).phase,''); await run(page,true); await page.waitForTimeout(1000); near((await state(page)).beta,.6,.0011,'preset cancels burst');
-  await page.getByRole('button',{name:/BURST TO 0.999c/i}).click(); await page.getByRole('slider').focus(); await page.getByRole('slider').press('Home');
+  await page.getByRole('button',{name:/ENGAGE RELATIVITY/i}).click(); await page.getByRole('slider').focus(); await page.getByRole('slider').press('Home');
   const cancelled=await state(page); assert.equal(cancelled.phase,''); near(cancelled.beta,0,.0011,'slider cancels burst');
   await page.getByRole('button',{name:/Reset/}).click(); const reset=await state(page); assert.equal(reset.position,0); assert.equal(reset.lab,0); assert.equal(reset.proper,0); assert.equal(reset.phase,''); assert.equal(reset.running,false);
   check('Pause, preset, slider and reset safely control the finite burst');
@@ -172,23 +178,21 @@ try {
   if(process.env.RECORD !== '0') {
     const recorded = await browser.newContext({viewport:{width:1440,height:900},deviceScaleFactor:1,
       recordVideo:{dir:resolve(folder,'raw'),size:{width:1440,height:900}}});
-    const view = await prepare(recorded); await speed(view,.2); await run(view,true);
+    const view = await prepare(recorded); await speed(view,.1); await run(view,true);
     const start=performance.now(), timeline=[];
     const until=async seconds=>{const left=seconds*1000-(performance.now()-start);if(left>0)await view.waitForTimeout(left);};
     const mark=async(name)=>{const s=await state(view);timeline.push({name,elapsedSeconds:(performance.now()-start)/1000,...s});await view.screenshot({path:resolve(folder,label+'-record-'+name+'.png')});};
-    await mark('slow'); await until(2); await view.getByRole('button',{name:/BURST TO 0.999c/i}).click();
-    await until(2.35);await mark('accelerating');await until(3.2);await mark('coasting');await until(4.6);await mark('braking');await until(5.5);await mark('recovered');
-    await until(7);await speed(view,.999);await until(8.7);await mark('passing');
-    await until(9);await run(view,false);await view.getByTestId('optical-baseline').click();await until(9.5);await mark('baseline');
-    await until(10.7);await view.getByTestId('optical-baseline').click();await until(11.2);await mark('restored');
-    await until(12.2);await run(view,true);await until(14);await mark('continuing');
+    await view.getByRole('button',{name:/ENGAGE RELATIVITY/i}).click();
+    await mark('t0-slow'); await until(1.8); await mark('t2-accelerating');
+    await until(3);await mark('measurement-moment');await until(4); await mark('t4-high'); await until(6); await mark('t6-braking');
+    await until(7.3);await mark('recovered');await until(9);await mark('continuing');
     const video=view.video();await recorded.close();const raw=await video.path();
     const metadata=JSON.parse(execFileSync(ffprobe,['-v','error','-show_entries','format=duration','-of','json',raw],{encoding:'utf8'}));
-    const duration=Number(metadata.format.duration), clip=Math.min(14,duration), output=resolve(folder,label+'.mp4');
+    const duration=Number(metadata.format.duration), clip=Math.min(10,duration), output=resolve(folder,label+'.mp4');
     const trimStart = Math.max(0,duration-clip-1);
     execFileSync(ffmpeg,['-hide_banner','-loglevel','error','-y','-ss',String(trimStart),'-i',raw,'-t',String(clip),'-an','-c:v','libx264','-preset','veryfast','-crf','19','-pix_fmt','yuv420p','-movflags','+faststart',output]);
     report.recording={raw,output,durationSeconds:clip,rawDurationSeconds:duration,trimStartSeconds:trimStart,timeline,kind:'Actual isolated browser recording; no generated footage; setup and final second trimmed, retaining slow approach'};
-    check('Recorded actual slow flight, finite burst, braking and optical comparison',report.recording);
+    check('Recorded actual T0 slow flight, T2 acceleration, T4 high-speed and T6 braking',report.recording);
   }
   assert.deepEqual(report.pageErrors,[]);assert.deepEqual(report.externalRequests,[]);assert.deepEqual(report.providerAttempts,[]);
   assert.ok(report.failedRequests.every(r=>report.blockedStatus.some(s=>s.path===r.path)),'only intentionally blocked status GETs may fail');

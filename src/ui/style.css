@@ -1398,3 +1398,97 @@ summary span {
   .flythrough-layout .world-panel .direction-status { display:none; }
   .flythrough-layout .world-panel:has(.world-diagnostics[open]) .direction-status { display:block; }
 }
+
+/* Final experience: moving space first, instruments as small observer-frame overlays. */
+.cinematic-layout { display:block; height:100svh; min-height:620px; padding:0; }
+.cinematic-layout #universe,.cinematic-layout .cockpit { inset:0; width:100%; height:100%; min-height:0; border-radius:0; }
+.cinematic-layout .cockpit { opacity:.28; }
+.cinematic-layout .shade { background:linear-gradient(#02060b80,transparent 22%,transparent 64%,#030810ed); }
+.cinematic-layout .masthead { position:absolute; top:18px; left:24px; right:24px; height:30px; }
+.cinematic-layout .edition,.cinematic-layout .connection>span { display:none; }
+.cinematic-layout .connection { font-size:9px; }
+.cinematic-layout .flight-readout { position:absolute; inset:72px 24px auto; padding:0; background:none; height:auto; }
+.cinematic-layout .flight-readout>.eyebrow { font-size:9px; }
+.cinematic-layout .velocity { font-size:44px; line-height:1; margin-top:7px; }
+.cinematic-layout .velocity span { font-size:22px; }
+.cinematic-layout .gamma { margin-top:7px; }
+.cinematic-layout .gamma>span { display:none; }
+.cinematic-layout .gamma b { font-size:20px; }
+.cinematic-layout .flight-readout h1,.cinematic-layout .subtitle,.cinematic-layout .instant-experience,
+.cinematic-layout .doppler,.cinematic-layout .frequency-note { display:none; }
+.cinematic-layout .burst-button { position:fixed; bottom:128px; left:50%; transform:translateX(-50%); margin:0; padding:19px 30px; font-size:23px; letter-spacing:1px; box-shadow:0 0 50px #b0fcb430; white-space:nowrap; }
+.cinematic-layout .burst-button span { display:block; font-size:9px; margin:7px 0 0; padding:0; }
+.cinematic-layout .burst-status { position:fixed; bottom:105px; left:50%; transform:translateX(-50%); margin:0; white-space:nowrap; }
+.cinematic-layout .physics-view-title { position:absolute; top:58px; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; text-align:center; gap:5px; font:9px ui-monospace,monospace; color:#b4c8d5; letter-spacing:1.2px; }
+.cinematic-layout .physics-view-title span { font-size:9px; letter-spacing:0; color:#829baa; }
+.cinematic-layout .journey-clocks { position:absolute; left:26px; bottom:133px; display:grid; gap:16px; padding:14px 18px; border-left:1px solid #c5e5da55; background:#04101b66; }
+.cinematic-layout .journey-clocks .clock>svg { width:35px; }
+.cinematic-layout .journey-clocks .clock output { font-size:27px; }
+.cinematic-layout .journey-clocks .clock .eyebrow { font-size:8px; }
+.cinematic-layout .sight { top:46%; left:50%; opacity:.45; }
+.cinematic-layout .view-strip { position:absolute; left:auto; right:25px; top:auto; bottom:118px; width:235px; gap:5px; }
+.cinematic-layout .view-strip button { font-size:10px; padding:6px 9px; }
+.cinematic-layout .view-strip>.eyebrow,.cinematic-layout .baseline-note { display:none; }
+.cinematic-layout .throttle { position:absolute; inset:auto 24px 39px; height:55px; padding:6px 12px; background:#071522ca; border-color:#9db9ca33; }
+.cinematic-layout .throttle-top { position:absolute; right:12px; top:8px; }
+.cinematic-layout .throttle-top>label,.cinematic-layout .target,.cinematic-layout .tour-caption,.cinematic-layout .demo-button { display:none; }
+.cinematic-layout .throttle input { position:absolute; top:0; left:0; width:100%; height:3px; margin:0; opacity:.4; }
+.cinematic-layout .throttle input:hover,.cinematic-layout .throttle input:focus { opacity:1; }
+.cinematic-layout .throttle-bottom { display:block; margin:0; }
+.cinematic-layout .presets { display:flex; justify-content:center; padding-right:130px; gap:12px; }
+.cinematic-layout .presets button { font-size:13px; min-width:85px; padding:9px 15px; }
+.cinematic-layout .transport button { padding:7px 10px; font-size:11px; }
+.cinematic-layout .footer { position:absolute; inset:auto 25px 9px; height:24px; justify-content:space-between; }
+.cinematic-layout .footer>div { display:block; }
+.cinematic-layout .colour-label { font-size:9px; }
+.cinematic-layout .source-note { display:none; }
+.cinematic-layout .footer summary,.cinematic-layout .explain-toggle { font-size:11px; padding:4px 8px; }
+.cinematic-layout .explain-layer { display:none; }
+.cinematic-layout.explain-open .explain-layer { display:grid; position:absolute; left:50%; top:20%; transform:translateX(-50%); width:min(920px,calc(100% - 50px)); grid-template-columns:1.2fr 1fr; gap:10px; z-index:6; background:#06101df2; padding:12px; border:1px solid #c0ddcf66; border-radius:14px; }
+.cinematic-layout .explain-layer .measurement-panel,.cinematic-layout .explain-layer .time-panel { grid-column:auto; grid-row:auto; padding:14px; min-height:265px; }
+.cinematic-layout.explain-open .demo-button { display:block; position:fixed; top:52px; left:24px; z-index:7; }
+.cinematic-layout.explain-open .doppler { display:flex; position:fixed; top:165px; left:24px; right:auto; bottom:auto; }
+.cinematic-layout.measurement-moment:not(.explain-open) .explain-layer { display:grid; position:absolute; bottom:230px; left:50%; transform:translateX(-50%); width:610px; max-width:70%; grid-template-columns:1.25fr 1fr; gap:0; z-index:4; background:#06101ddd; border:1px solid #d7e8c455; border-radius:12px; animation:measurement-in .25s ease-out; }
+.cinematic-layout.measurement-moment:not(.explain-open) .explain-layer>section,.cinematic-layout.measurement-moment:not(.explain-open) .explain-layer>aside { padding:12px; border:0; border-radius:0; background:none; min-height:0; }
+.cinematic-layout.measurement-moment:not(.explain-open) .instrument-title,.cinematic-layout.measurement-moment:not(.explain-open) .shorter,
+.cinematic-layout.measurement-moment:not(.explain-open) .rest-label,.cinematic-layout.measurement-moment:not(.explain-open) .constant-comparison,
+.cinematic-layout.measurement-moment:not(.explain-open) .tick-note { display:none; }
+.cinematic-layout.measurement-moment:not(.explain-open) .length-headline { gap:8px; }
+.cinematic-layout.measurement-moment:not(.explain-open) .length-headline>span { font-size:23px; }
+.cinematic-layout.measurement-moment:not(.explain-open) .length-headline>b { font-size:37px; }
+.cinematic-layout.measurement-moment:not(.explain-open) .ruler { height:67px; margin:5px 0; }
+.cinematic-layout.measurement-moment:not(.explain-open) .measurement-caption { font-size:8px; }
+.cinematic-layout.measurement-moment:not(.explain-open) .rate-statement { margin:10px 0 0; }
+.cinematic-layout.measurement-moment:not(.explain-open) .rate-statement>span { font-size:12px; }
+.cinematic-layout.measurement-moment:not(.explain-open) .rate-statement>strong { font-size:29px; }
+.cinematic-layout.measurement-moment:not(.explain-open) .rate-statement small { display:block; margin-top:7px; font-size:13px; }
+@keyframes measurement-in { from { opacity:0; transform:translate(-50%,12px); } to { opacity:1; transform:translate(-50%,0); } }
+.cinematic-layout .world-panel { position:absolute; top:68px; right:24px; width:260px; padding:10px; background:#06101dc9; border-color:#adc9df30; max-height:calc(100% - 310px); overflow:auto; }
+.cinematic-layout .world-heading h2,.cinematic-layout .world-panel .direction-status,.cinematic-layout .world-panel>.ai-label,.cinematic-layout .world-controls>span { display:none; }
+.cinematic-layout .world-panel .world-heading .eyebrow { font-size:8px; }
+.cinematic-layout .world-panel .world-controls button { padding:7px; font-size:11px; }
+.cinematic-layout .world-panel .world-diagnostics[open] { position:relative; }
+.cinematic-layout .world-panel:has(.world-diagnostics[open]) .direction-status,.cinematic-layout .world-panel:has(.world-diagnostics[open])>.ai-label { display:block; }
+.cinematic-layout .world-panel:not(:has([data-state="IDLE"],[data-state="STOPPED"],[data-state="FAILED"],[data-state="EXPIRED"],[data-state="COMPLETED"],[data-state="VIDEO PLAYING"]))::before { content:'REACTOR IS IMAGINING THIS JOURNEY…'; display:block; font-size:10px; color:#d8e7c6; margin-bottom:9px; }
+.cinematic-layout .runware-frame { margin:8px 0 0; }
+.cinematic-layout .runware-frame img { display:block; width:100%; max-height:118px; object-fit:cover; border-radius:5px; }
+.cinematic-layout .runware-frame figcaption,.cinematic-layout .sponsor-provenance { font-size:8px; line-height:1.5; color:#b1c2ce; margin:5px 0 0; }
+.cinematic-layout:has(.world-status.live) #universe,.cinematic-layout:has(.world-status.live) .cockpit { width:55%; }
+.cinematic-layout:has(.world-status.live) .world-panel { top:65px; right:18px; width:calc(45% - 26px); height:calc(100% - 165px); max-height:none; background:#04101bed; display:flex; }
+.cinematic-layout:has(.world-status.live) .world-screen { height:auto; min-height:120px; flex:1; opacity:1; position:relative; width:100%; }
+.cinematic-layout:has(.world-status.live) .world-panel>.ai-label { display:block; }
+.cinematic-layout:has(.world-status.live) .physics-view-title { left:27.5%; }
+.cinematic-layout:has(.world-status.live) .burst-button,.cinematic-layout:has(.world-status.live) .burst-status { left:27.5%; }
+.cinematic-layout:has(.world-status.live) .sight { left:27.5%; }
+.cinematic-layout:has(.world-status.live) .view-strip { right:calc(45% + 15px); bottom:215px; }
+@media(max-width:1000px) {
+  .cinematic-layout .burst-button { font-size:18px; padding:15px 20px; }
+  .cinematic-layout .journey-clocks { left:14px; padding:8px; }
+  .cinematic-layout .journey-clocks .clock output { font-size:20px; }
+  .cinematic-layout .view-strip { width:195px; right:15px; }
+  .cinematic-layout .world-panel { width:220px; right:14px; }
+  .cinematic-layout .presets { justify-content:flex-start; gap:3px; }
+  .cinematic-layout .presets button { min-width:65px; font-size:11px; padding:9px 8px; }
+}
+.cinematic-layout .sponsor-provenance { display:grid; gap:3px; }
+.cinematic-layout:has(.world-status.live) .world-heading h2 { display:block; font-size:18px; }

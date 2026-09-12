@@ -1,5 +1,17 @@
 # Worlds — verification record
 
+## Final cinematic presentation gate
+
+The latest source uses the same numerical engine with a6.5-second prescribed
+burst, moving0.1c default and Explain drawer. Its separate production output is
+build/relativity-cinematic-candidate on4176. Current command/browser/timed-video
+artifacts use cinematic labels under build/evidence/flythrough; the aggregate is
+cinematic-verification.json. Preserve5ca2502's final-verification.json and earlier
+counts. Record actual T0/~T2/T4/T6 frames and inspect geometry, not just readouts.
+The one user-approved Runware image remains separately accounted; no fresh
+Reactor allocation is authorised.
+
+
 ## Current fly-through gate
 
 The latest bounded implementation has its own receipt at
